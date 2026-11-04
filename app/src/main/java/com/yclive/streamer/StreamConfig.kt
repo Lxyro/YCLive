@@ -11,12 +11,9 @@ enum class StreamOrientation : Serializable {
 data class StreamConfig(
     val baseResolution: Int = 1080, // 1080 veya 720
     val orientation: StreamOrientation = StreamOrientation.LANDSCAPE,
-    val fps: Int = 60,
-    val bitrate: Int = 25_000_000 // 25 Mbps
+    val fps: Int = 120, // 60, 90 veya 120 FPS
+    val bitrate: Int = 40_000_000 // 40 Mbps (Kristal netlik)
 ) : Serializable {
-
-    // Helper to align dimensions to multiple of 16 for hardware MediaCodec
-    private fun align16(value: Int): Int = (value + 15) / 16 * 16
 
     val width: Int
         get() = when (orientation) {
@@ -37,7 +34,7 @@ data class StreamConfig(
 
     val resolutionLabel: String
         get() = when (orientation) {
-            StreamOrientation.LANDSCAPE -> "${width}x${height} (Yatay 16:9)"
+            StreamOrientation.LANDSCAPE -> "${width}x${height} (Yatay 16:9 / 20:9)"
             StreamOrientation.PORTRAIT -> "${width}x${height} (Dikey 9:16)"
             StreamOrientation.AUTO -> "${width}x${height} (Otomatik)"
         }
@@ -48,9 +45,12 @@ data class StreamConfig(
 
         const val FPS_60 = 60
         const val FPS_90 = 90
+        const val FPS_120 = 120
 
         const val BITRATE_15_MBPS = 15_000_000
         const val BITRATE_25_MBPS = 25_000_000
+        const val BITRATE_40_MBPS = 40_000_000
+        const val BITRATE_60_MBPS = 60_000_000
         const val BITRATE_35_MBPS = 35_000_000
     }
 }

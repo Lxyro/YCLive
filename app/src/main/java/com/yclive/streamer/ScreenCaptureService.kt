@@ -201,7 +201,7 @@ class ScreenCaptureService : Service() {
             setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface)
             setInteger(MediaFormat.KEY_BIT_RATE, config.bitrate)
             setInteger(MediaFormat.KEY_FRAME_RATE, config.fps)
-            setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 1) // 1 second keyframe interval
+            setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 2) // 2-second keyframe interval for rock-solid visual fidelity
 
             // Hardware FPS Limit: strictly throttle 120Hz/144Hz displays to target config.fps
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -217,9 +217,15 @@ class ScreenCaptureService : Service() {
             setInteger(MediaFormat.KEY_LATENCY, 0)
             setInteger(MediaFormat.KEY_PRIORITY, 0) // Realtime
 
-            // Baseline profile for widest compatibility and zero decoding delay
-            setInteger(MediaFormat.KEY_PROFILE, MediaCodecInfo.CodecProfileLevel.AVCProfileBaseline)
-            setInteger(MediaFormat.KEY_LEVEL, MediaCodecInfo.CodecProfileLevel.AVCLevel42)
+            // High Profile H.264 (CABAC + 8x8 transform) for crisp gaming textures without pixelation
+            try {
+                setInteger(MediaFormat.KEY_PROFILE, MediaCodecInfo.CodecProfileLevel.AVCProfileHigh)
+                setInteger(MediaFormat.KEY_LEVEL, MediaCodecInfo.CodecProfileLevel.AVCLevel51)
+            } catch (_: Exception) {
+                try {
+                    setInteger(MediaFormat.KEY_PROFILE, MediaCodecInfo.CodecProfileLevel.AVCProfileMain)
+                } catch (_: Exception) {}
+            }
 
             // Hardware low-latency extensions (Qualcomm Snapdragon, MediaTek, etc.)
             try {

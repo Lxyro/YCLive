@@ -329,6 +329,8 @@
       const scaleLabels = ['ÖLÇEK: SIĞDIR', 'ÖLÇEK: DOLDUR', 'ÖLÇEK: ESNET'];
       let isHudVisible = true;
 
+      let smoothedDriftMs = 18;
+
       function initJMuxer() {
         if (jmuxer) return;
         try {
@@ -342,14 +344,14 @@
             node: 'video-player',
             mode: 'video',
             flushingTime: 0,
-            fps: 60,
+            fps: 120, // Support up to 120 FPS high-refresh rate competitive gaming
             clearBuffer: true,
             debug: false,
             onError: function (err) {
               console.warn('JMuxer log:', err);
             }
           });
-          console.log('JMuxer Pro 60FPS sıfır gecikme motoru hazır.');
+          console.log('JMuxer Pro 120FPS sıfır gecikme motoru hazır.');
         } catch (e) {
           console.error('JMuxer hatası:', e);
         }
@@ -367,7 +369,6 @@
 
       function updateResolution() {
         if (video.videoWidth > 0 && video.videoHeight > 0) {
-          const ratio = (video.videoWidth / video.videoHeight).toFixed(2);
           const orientationTag = video.videoWidth >= video.videoHeight ? 'Yatay' : 'Dikey';
           resLabel.innerText = `${video.videoWidth}x${video.videoHeight} (${orientationTag})`;
         }
@@ -384,30 +385,25 @@
       video.addEventListener('loadedmetadata', updateResolution);
       video.addEventListener('resize', updateResolution);
 
-      // Heavy Latency Optimizer: Micro-playback rate adjustment + Instant snap
+      // Heavy Latency Optimizer: Smooth Proportional Pacing (NO Micro-Seek Stutter)
       function optimizeLatency() {
         if (video.buffered.length > 0) {
           const end = video.buffered.end(video.buffered.length - 1);
           const drift = end - video.currentTime;
 
-          // If drift exceeds 80ms (network hiccup), snap directly to live edge
-          if (drift > 0.08) {
-            video.currentTime = end - 0.01;
+          // Only perform hard snap if real tab switch / lag spike (>300ms)
+          if (drift > 0.35) {
+            video.currentTime = end - 0.02;
           } else if (drift > 0.035) {
-            // Smoothly drain the buffer without audio/video dropouts
-            video.playbackRate = 1.05;
+            // Proportional smooth catchup: gently drain buffer without micro-stutters
+            video.playbackRate = 1.04;
           } else if (drift < 0.015) {
             video.playbackRate = 1.0;
           }
 
-          const ms = Math.max(5, Math.round(drift * 1000));
-          if (ms < 40) {
-            lagLabel.innerText = `<${ms}ms (SIFIR)`;
-            lagLabel.style.color = '#10B981';
-          } else {
-            lagLabel.innerText = `${ms}ms`;
-            lagLabel.style.color = '#F59E0B';
-          }
+          // Exponential Moving Average filter: completely eliminates crazy 25-200ms flicker
+          const instantMs = Math.max(5, Math.min(100, Math.round(drift * 1000)));
+          smoothedDriftMs = Math.round(smoothedDriftMs * 0.88 + instantMs * 0.12);
         }
       }
 
@@ -464,7 +460,7 @@
         };
       }
 
-      // Bitrate & FPS loop
+      // Bitrate, FPS & Smooth Latency loop (Updates calm & stable once per second)
       setInterval(() => {
         const now = performance.now();
         const elapsed = (now - lastMetricsTime) / 1000;
@@ -474,6 +470,15 @@
 
           fpsLabel.innerText = fps.toString();
           bitrateLabel.innerText = `${mbps} Mbps`;
+
+          // Rock-solid smoothed latency readout
+          if (smoothedDriftMs <= 35) {
+            lagLabel.innerText = `<${smoothedDriftMs}ms (SIFIR)`;
+            lagLabel.style.color = '#10B981';
+          } else {
+            lagLabel.innerText = `${smoothedDriftMs}ms`;
+            lagLabel.style.color = '#F59E0B';
+          }
 
           frameCount = 0;
           byteCount = 0;

@@ -139,7 +139,7 @@ fun MainScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // 1. Pro Studio Square Header (Black & Light Grey Theme)
-            StudioSquareHeader(isStreaming = isStreaming)
+            StudioSquareHeader(isStreaming = isStreaming, fps = config.fps)
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -196,7 +196,7 @@ fun MainScreen(
 // 1. PRO STUDIO SQUARE HEADER (Square Logo, Light Grey & Black Studio Theme)
 // -------------------------------------------------------------------------------------------------
 @Composable
-private fun StudioSquareHeader(isStreaming: Boolean) {
+private fun StudioSquareHeader(isStreaming: Boolean, fps: Int) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -222,7 +222,7 @@ private fun StudioSquareHeader(isStreaming: Boolean) {
                         .padding(horizontal = 5.dp, vertical = 2.dp)
                 ) {
                     Text(
-                        text = "60 FPS",
+                        text = "$fps FPS PRO",
                         fontSize = 9.sp,
                         fontWeight = FontWeight.Bold,
                         color = StudioBlack
@@ -718,36 +718,44 @@ private fun StudioSettingsTab(
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     SegmentedChoicePill(
                         modifier = Modifier.weight(1f),
-                        title = "60 FPS (Önerilen)",
-                        subtitle = "Kararlı 0ms Gecikme",
+                        title = "60 FPS",
+                        subtitle = "Standart",
                         isSelected = config.fps == StreamConfig.FPS_60,
                         enabled = !isStreaming,
                         onSelect = { onConfigChange(config.copy(fps = StreamConfig.FPS_60)) }
                     )
                     SegmentedChoicePill(
                         modifier = Modifier.weight(1f),
-                        title = "90 FPS (Ultra)",
-                        subtitle = "Yüksek Hızlı Ekran",
+                        title = "90 FPS",
+                        subtitle = "Akıcı",
                         isSelected = config.fps == StreamConfig.FPS_90,
                         enabled = !isStreaming,
                         onSelect = { onConfigChange(config.copy(fps = StreamConfig.FPS_90)) }
+                    )
+                    SegmentedChoicePill(
+                        modifier = Modifier.weight(1f),
+                        title = "120 FPS",
+                        subtitle = "E-Spor Pro",
+                        isSelected = config.fps == StreamConfig.FPS_120,
+                        enabled = !isStreaming,
+                        onSelect = { onConfigChange(config.copy(fps = StreamConfig.FPS_120)) }
                     )
                 }
 
                 Spacer(modifier = Modifier.height(18.dp))
 
                 Text(
-                    text = "Donanımsal Bitrate (CBR)",
+                    text = "Donanımsal Bitrate (CBR & High Profile)",
                     fontSize = 17.sp,
                     fontWeight = FontWeight.Bold,
                     color = TextTitle
                 )
                 Text(
-                    text = "Wi-Fi sinyalinize uygun sabit bant genişliği seçin",
+                    text = "Yüksek hareketli oyunlarda görüntü bozulmasını engelleyen sabit bant genişliği",
                     fontSize = 12.sp,
                     color = TextSubtle
                 )
@@ -760,27 +768,27 @@ private fun StudioSettingsTab(
                 ) {
                     SegmentedChoicePill(
                         modifier = Modifier.weight(1f),
-                        title = "15 Mbps",
-                        subtitle = "Hafif / Düşük Ağ",
-                        isSelected = config.bitrate == StreamConfig.BITRATE_15_MBPS,
-                        enabled = !isStreaming,
-                        onSelect = { onConfigChange(config.copy(bitrate = StreamConfig.BITRATE_15_MBPS)) }
-                    )
-                    SegmentedChoicePill(
-                        modifier = Modifier.weight(1f),
                         title = "25 Mbps",
-                        subtitle = "Kristal Netlik",
+                        subtitle = "Dengeli",
                         isSelected = config.bitrate == StreamConfig.BITRATE_25_MBPS,
                         enabled = !isStreaming,
                         onSelect = { onConfigChange(config.copy(bitrate = StreamConfig.BITRATE_25_MBPS)) }
                     )
                     SegmentedChoicePill(
                         modifier = Modifier.weight(1f),
-                        title = "35 Mbps",
-                        subtitle = "Ultra HD Rekabetçi",
-                        isSelected = config.bitrate == StreamConfig.BITRATE_35_MBPS,
+                        title = "40 Mbps",
+                        subtitle = "Pro Gaming",
+                        isSelected = config.bitrate == StreamConfig.BITRATE_40_MBPS,
                         enabled = !isStreaming,
-                        onSelect = { onConfigChange(config.copy(bitrate = StreamConfig.BITRATE_35_MBPS)) }
+                        onSelect = { onConfigChange(config.copy(bitrate = StreamConfig.BITRATE_40_MBPS)) }
+                    )
+                    SegmentedChoicePill(
+                        modifier = Modifier.weight(1f),
+                        title = "60 Mbps",
+                        subtitle = "Kristal 120Hz",
+                        isSelected = config.bitrate == StreamConfig.BITRATE_60_MBPS,
+                        enabled = !isStreaming,
+                        onSelect = { onConfigChange(config.copy(bitrate = StreamConfig.BITRATE_60_MBPS)) }
                     )
                 }
             }
