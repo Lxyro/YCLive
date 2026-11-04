@@ -9,9 +9,9 @@ import android.widget.Toast
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
@@ -71,6 +71,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -86,10 +87,10 @@ import com.yclive.streamer.ui.theme.AppleBlue
 import com.yclive.streamer.ui.theme.CanvasBg
 import com.yclive.streamer.ui.theme.CardBorder
 import com.yclive.streamer.ui.theme.CardSurface
-import com.yclive.streamer.ui.theme.DockBg
 import com.yclive.streamer.ui.theme.DockIconActive
 import com.yclive.streamer.ui.theme.DockIconInactive
 import com.yclive.streamer.ui.theme.DockPillActive
+import com.yclive.streamer.ui.theme.LiquidGlassBorder
 import com.yclive.streamer.ui.theme.LiveGreen
 import com.yclive.streamer.ui.theme.LiveGreenLight
 import com.yclive.streamer.ui.theme.PillBgActive
@@ -97,6 +98,11 @@ import com.yclive.streamer.ui.theme.PillBgInactive
 import com.yclive.streamer.ui.theme.PillTextActive
 import com.yclive.streamer.ui.theme.PillTextInactive
 import com.yclive.streamer.ui.theme.PureWhite
+import com.yclive.streamer.ui.theme.StudioBlack
+import com.yclive.streamer.ui.theme.StudioBorder
+import com.yclive.streamer.ui.theme.StudioDarkGrey
+import com.yclive.streamer.ui.theme.StudioLightGrey
+import com.yclive.streamer.ui.theme.StudioMutedGrey
 import com.yclive.streamer.ui.theme.TextDark
 import com.yclive.streamer.ui.theme.TextSubtle
 import com.yclive.streamer.ui.theme.TextTitle
@@ -111,13 +117,14 @@ fun MainScreen(
     onToggleStream: () -> Unit
 ) {
     val scrollState = rememberScrollState()
-    var selectedDockTab by remember { mutableIntStateOf(0) } // 0: Yayın, 1: Ayarlar, 2: Cihaz
+    var selectedDockTab by remember { mutableIntStateOf(0) } // 0: Stüdyo, 1: Ayarlar, 2: Sistem
     val streamUrl = "http://$localIp:8080"
 
     Scaffold(
         containerColor = CanvasBg,
         bottomBar = {
-            FloatingAppleDockBar(
+            // True Liquid Glass Floating Island Dock
+            LiquidGlassFloatingIsland(
                 selectedTab = selectedDockTab,
                 onSelectTab = { selectedDockTab = it }
             )
@@ -128,23 +135,23 @@ fun MainScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
                 .verticalScroll(scrollState)
-                .padding(horizontal = 20.dp, vertical = 18.dp),
+                .padding(horizontal = 18.dp, vertical = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // 1. Apple-Style Header (Matching Reference: "Good Morning! ☀️ / Hello, Drescher")
-            AppleHeaderSection(isStreaming = isStreaming)
+            // 1. Pro Studio Square Header (Black & Light Grey Theme)
+            StudioSquareHeader(isStreaming = isStreaming)
 
-            Spacer(modifier = Modifier.height(18.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-            // 2. Segmented Horizontal Filter Pills (Matching Reference: [All] [Casual] [Jackets] [Shoes])
-            IOSSegmentedFilterRow(
+            // 2. Horizontal Filter Segmented Pills with Liquid Glass Physics
+            StudioSegmentedFilterRow(
                 selectedTab = selectedDockTab,
                 onTabSelect = { selectedDockTab = it }
             )
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(18.dp))
 
-            // 3. Tab Content with Spring Slide Transition
+            // 3. Animated Tab Switcher
             AnimatedContent(
                 targetState = selectedDockTab,
                 transitionSpec = {
@@ -156,73 +163,93 @@ fun MainScreen(
                             .togetherWith(slideOutHorizontally(animationSpec = spring(stiffness = Spring.StiffnessMediumLow)) { it } + fadeOut())
                     }
                 },
-                label = "appleTabTransition"
+                label = "studioTabTransition"
             ) { tab ->
                 when (tab) {
-                    0 -> AppleLiveDashboardTab(
+                    0 -> StudioLiveDashboardTab(
                         isStreaming = isStreaming,
                         clientCount = clientCount,
                         streamUrl = streamUrl,
                         config = config,
                         onToggleStream = onToggleStream
                     )
-                    1 -> AppleSettingsTab(
+                    1 -> StudioSettingsTab(
                         config = config,
                         isStreaming = isStreaming,
                         onConfigChange = onConfigChange
                     )
-                    else -> AppleDeviceTab(
+                    else -> StudioSystemTab(
                         localIp = localIp,
                         streamUrl = streamUrl,
-                        isStreaming = isStreaming
+                        isStreaming = isStreaming,
+                        config = config
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(36.dp))
         }
     }
 }
 
 // -------------------------------------------------------------------------------------------------
-// 1. APPLE TOP HEADER (Matching the Reference Screenshot)
+// 1. PRO STUDIO SQUARE HEADER (Square Logo, Light Grey & Black Studio Theme)
 // -------------------------------------------------------------------------------------------------
 @Composable
-private fun AppleHeaderSection(isStreaming: Boolean) {
+private fun StudioSquareHeader(isStreaming: Boolean) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column {
-            Text(
-                text = "YC LIVE STREAMER ☀️",
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 0.8.sp,
-                color = TextSubtle
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Text(
+                    text = "YC LIVE PRO STUDIO",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.sp,
+                    color = TextSubtle
+                )
+                // Small Studio Tag
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(StudioLightGrey)
+                        .padding(horizontal = 5.dp, vertical = 2.dp)
+                ) {
+                    Text(
+                        text = "60 FPS",
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = StudioBlack
+                    )
+                }
+            }
             Spacer(modifier = Modifier.height(2.dp))
             Text(
-                text = "Ekran Yayını",
+                text = "Ekran Stüdyosu",
                 fontSize = 26.sp,
-                fontWeight = FontWeight.Bold,
-                letterSpacing = (-0.5).sp,
+                fontWeight = FontWeight.ExtraBold,
+                letterSpacing = (-0.6).sp,
                 color = TextTitle
             )
         }
 
-        // Right side: Status indicator + Minimalist Brand Emblem
+        // Right side: Square Studio Logo Badge & Live Indicator
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             // Live Status Pill
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(999.dp))
                     .background(if (isStreaming) LiveGreenLight else PillBgInactive)
-                    .padding(horizontal = 12.dp, vertical = 6.dp)
+                    .padding(horizontal = 11.dp, vertical = 6.dp)
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -244,20 +271,21 @@ private fun AppleHeaderSection(isStreaming: Boolean) {
                 }
             }
 
-            // Minimalist Luxury Monochrome Emblem (NO neon)
+            // Square Studio Logo Mark (Light Grey Frame, Obsidian Black Core)
             Box(
                 modifier = Modifier
-                    .size(42.dp)
-                    .clip(CircleShape)
-                    .background(DockBg)
-                    .shadow(elevation = 3.dp, shape = CircleShape),
+                    .size(44.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(StudioBlack)
+                    .border(1.5.dp, StudioLightGrey, RoundedCornerShape(12.dp))
+                    .shadow(elevation = 4.dp, shape = RoundedCornerShape(12.dp)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Default.Tv,
-                    contentDescription = "Brand Emblem",
+                    contentDescription = "Studio Square Logo",
                     tint = PureWhite,
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier.size(22.dp)
                 )
             }
         }
@@ -265,32 +293,32 @@ private fun AppleHeaderSection(isStreaming: Boolean) {
 }
 
 // -------------------------------------------------------------------------------------------------
-// 2. SEGMENTED FILTER PILLS (Matching the Reference: [All] [Casual] [Jackets] [Shoes])
+// 2. SEGMENTED FILTER PILLS (With Tactile Liquid Motion)
 // -------------------------------------------------------------------------------------------------
 @Composable
-private fun IOSSegmentedFilterRow(
+private fun StudioSegmentedFilterRow(
     selectedTab: Int,
     onTabSelect: (Int) -> Unit
 ) {
-    val items = listOf("Yayın Masası", "Yatay / Dikey", "Cihaz & Ağ")
+    val items = listOf("Yayın Masası", "Yatay / Dikey", "Performans & Ağ")
     val scrollState = rememberScrollState()
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .horizontalScroll(scrollState),
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items.forEachIndexed { index, label ->
             val isSelected = selectedTab == index
             val bgColor by animateColorAsState(
-                targetValue = if (isSelected) PillBgActive else PillBgInactive,
-                animationSpec = tween(220),
+                targetValue = if (isSelected) StudioBlack else PillBgInactive,
+                animationSpec = tween(200),
                 label = "pillBg"
             )
             val textColor by animateColorAsState(
-                targetValue = if (isSelected) PillTextActive else PillTextInactive,
-                animationSpec = tween(220),
+                targetValue = if (isSelected) PureWhite else PillTextInactive,
+                animationSpec = tween(200),
                 label = "pillText"
             )
 
@@ -298,11 +326,16 @@ private fun IOSSegmentedFilterRow(
                 modifier = Modifier
                     .clip(RoundedCornerShape(999.dp))
                     .background(bgColor)
+                    .border(
+                        width = if (isSelected) 1.dp else 0.dp,
+                        color = if (isSelected) StudioLightGrey.copy(alpha = 0.3f) else Color.Transparent,
+                        shape = RoundedCornerShape(999.dp)
+                    )
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null
                     ) { onTabSelect(index) }
-                    .padding(horizontal = 20.dp, vertical = 10.dp),
+                    .padding(horizontal = 18.dp, vertical = 9.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
@@ -318,10 +351,10 @@ private fun IOSSegmentedFilterRow(
 }
 
 // -------------------------------------------------------------------------------------------------
-// 3. TAB 1: APPLE LIVE DASHBOARD
+// 3. TAB 1: STUDIO LIVE DASHBOARD (Box -> Network Address -> Start Button)
 // -------------------------------------------------------------------------------------------------
 @Composable
-private fun AppleLiveDashboardTab(
+private fun StudioLiveDashboardTab(
     isStreaming: Boolean,
     clientCount: Int,
     streamUrl: String,
@@ -332,50 +365,54 @@ private fun AppleLiveDashboardTab(
 
     Column(
         modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
-        // Hero Visual Display Card (With Frosted Glass Overlay Badge like reference image)
+        // [1] STREAM MONITOR BOX (Dark Studio Surface + Animated Audio Waves)
         Card(
             modifier = Modifier
                 .fillMaxWidth()
                 .shadow(
-                    elevation = 4.dp,
+                    elevation = 6.dp,
                     shape = RoundedCornerShape(26.dp),
-                    spotColor = Color(0x12000000)
+                    spotColor = Color(0x18000000)
                 ),
             shape = RoundedCornerShape(26.dp),
             colors = CardDefaults.cardColors(containerColor = CardSurface),
             border = androidx.compose.foundation.BorderStroke(1.dp, CardBorder)
         ) {
-            Column(modifier = Modifier.padding(18.dp)) {
-                // Monitor Mockup Box
+            Column(modifier = Modifier.padding(16.dp)) {
+                // Monitor Display Container
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(180.dp)
                         .clip(RoundedCornerShape(20.dp))
-                        .background(Color(0xFF141417)),
+                        .background(StudioBlack),
                     contentAlignment = Alignment.Center
                 ) {
                     if (isStreaming) {
-                        // Realtime Pulse Radar
                         RadarPulseBackground()
 
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
+                            // Animated Live Equalizer Waveform Bars!
+                            StreamingEqualizerBars()
+
+                            Spacer(modifier = Modifier.height(2.dp))
+
                             Text(
                                 text = "CANLI YAYIN AKTİF",
                                 fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold,
-                                letterSpacing = 0.5.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                letterSpacing = 0.6.sp,
                                 color = PureWhite
                             )
                             Text(
-                                text = "Sıfır gecikmeli H.264 donanım akışı yayında",
+                                text = "60 FPS Donanım CBR Akışı • Sıfır Gecikme",
                                 fontSize = 12.sp,
-                                color = Color(0xFF9CA3AF)
+                                color = StudioLightGrey
                             )
                         }
                     } else {
@@ -383,88 +420,75 @@ private fun AppleLiveDashboardTab(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.Tv,
-                                contentDescription = null,
-                                tint = Color(0xFF71717A),
-                                modifier = Modifier.size(36.dp)
-                            )
+                            Box(
+                                modifier = Modifier
+                                    .size(48.dp)
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(StudioDarkGrey),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Tv,
+                                    contentDescription = null,
+                                    tint = StudioLightGrey,
+                                    modifier = Modifier.size(26.dp)
+                                )
+                            }
                             Text(
-                                text = "Ekran Aynalama Hazır",
+                                text = "Stüdyo Aynası Hazır",
                                 fontSize = 15.sp,
-                                fontWeight = FontWeight.SemiBold,
+                                fontWeight = FontWeight.Bold,
                                 color = PureWhite
                             )
                             Text(
-                                text = "Tarayıcıda izlemek için yayını başlatın",
+                                text = "Bilgisayar tarayıcısında izlemek için yayını başlatın",
                                 fontSize = 12.sp,
-                                color = Color(0xFF71717A)
+                                color = StudioMutedGrey
                             )
                         }
                     }
 
-                    // Frosted Glass Bottom Overlay (Matching the "Urbanco Casual Shirt / $35" overlay in reference)
+                    // Top Left Pro Badge
                     Box(
                         modifier = Modifier
-                            .align(Alignment.BottomCenter)
-                            .fillMaxWidth()
+                            .align(Alignment.TopStart)
                             .padding(12.dp)
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(Color(0xB3222226))
-                            .padding(horizontal = 14.dp, vertical = 10.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(Color(0xCC202024))
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
                     ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Column {
-                                Text(
-                                    text = if (isStreaming) "İzleyici Bağlantı Adresi" else "Yerel Ağ Adresi",
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Medium,
-                                    color = Color(0xFFA1A1AA)
-                                )
-                                Text(
-                                    text = streamUrl,
-                                    fontSize = 13.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = PureWhite,
-                                    fontFamily = FontFamily.Monospace
-                                )
-                            }
+                        Text(
+                            text = if (config.orientation == StreamOrientation.LANDSCAPE) "YATAY (16:9 / 20:9)" else "DİKEY (9:16)",
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = StudioLightGrey
+                        )
+                    }
 
-                            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                SmallActionButton(
-                                    icon = Icons.Default.ContentCopy,
-                                    onClick = {
-                                        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                                        clipboard.setPrimaryClip(ClipData.newPlainText("YC Live Adresi", streamUrl))
-                                        Toast.makeText(context, "Bağlantı kopyalandı!", Toast.LENGTH_SHORT).show()
-                                    }
-                                )
-                                SmallActionButton(
-                                    icon = Icons.Default.Share,
-                                    onClick = {
-                                        val sendIntent = Intent().apply {
-                                            action = Intent.ACTION_SEND
-                                            putExtra(Intent.EXTRA_TEXT, streamUrl)
-                                            type = "text/plain"
-                                        }
-                                        context.startActivity(Intent.createChooser(sendIntent, "Yayın Adresini Paylaş"))
-                                    }
-                                )
-                            }
-                        }
+                    // Top Right Latency Indicator
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(12.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(Color(0xCC202024))
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                    ) {
+                        Text(
+                            text = "<25ms SIFIR GECİKME",
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = LiveGreen
+                        )
                     }
                 }
 
-                Spacer(modifier = Modifier.height(18.dp))
+                Spacer(modifier = Modifier.height(14.dp))
 
-                // Realtime Stats Matrix
+                // Stats Matrix
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     StatPillCard(
                         modifier = Modifier.weight(1f),
@@ -475,115 +499,150 @@ private fun AppleLiveDashboardTab(
                     )
                     StatPillCard(
                         modifier = Modifier.weight(1f),
-                        title = "Gecikme",
-                        value = "<40ms",
-                        sub = "Sıfır Gecikme",
+                        title = "FPS Kilidi",
+                        value = "${config.fps} FPS",
+                        sub = "Sabit Akış",
                         accentColor = LiveGreen
                     )
                     StatPillCard(
                         modifier = Modifier.weight(1f),
-                        title = "Çözünürlük",
-                        value = "${config.baseResolution}p",
-                        sub = if (config.orientation == StreamOrientation.LANDSCAPE) "Yatay" else "Dikey",
+                        title = "Bitrate",
+                        value = "${config.bitrateMbps} Mbps",
+                        sub = "CBR Turbo",
                         accentColor = TextDark
                     )
                 }
             }
         }
 
-        // 4. Hero Capsule Action Button (Matching Reference "Ready? Let's Go!")
-        AppleHeroActionButton(
-            isStreaming = isStreaming,
-            onClick = onToggleStream
-        )
-    }
-}
-
-// -------------------------------------------------------------------------------------------------
-// 4. TAB 2: APPLE SETTINGS TAB (Orientation Yatay/Dikey, FPS, Bitrate)
-// -------------------------------------------------------------------------------------------------
-@Composable
-private fun AppleSettingsTab(
-    config: StreamConfig,
-    isStreaming: Boolean,
-    onConfigChange: (StreamConfig) -> Unit
-) {
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        // Card 1: Orientation (Yatay / Dikey)
+        // [2] DEDICATED LOCAL NETWORK ADDRESS CARD (Placed BETWEEN Box and Action Button)
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .shadow(elevation = 3.dp, shape = RoundedCornerShape(26.dp), spotColor = Color(0x12000000)),
-            shape = RoundedCornerShape(26.dp),
+                .shadow(
+                    elevation = 4.dp,
+                    shape = RoundedCornerShape(22.dp),
+                    spotColor = Color(0x14000000)
+                ),
+            shape = RoundedCornerShape(22.dp),
             colors = CardDefaults.cardColors(containerColor = CardSurface),
-            border = androidx.compose.foundation.BorderStroke(1.dp, CardBorder)
+            border = androidx.compose.foundation.BorderStroke(1.5.dp, StudioBorder.copy(alpha = 0.5f))
         ) {
-            Column(modifier = Modifier.padding(20.dp)) {
-                Text(
-                    text = "Ekran Yönü",
-                    fontSize = 17.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = TextTitle
-                )
-                Text(
-                    text = "Oyunlar için Yatay, sosyal medya ve telefon ekranı için Dikey seçin",
-                    fontSize = 12.sp,
-                    color = TextSubtle
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 14.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    OrientationSelectCard(
-                        modifier = Modifier.weight(1f),
-                        title = "Yatay Mod",
-                        subtitle = "PUBG & Oyun",
-                        icon = Icons.Default.Tv,
-                        isSelected = config.orientation == StreamOrientation.LANDSCAPE,
-                        enabled = !isStreaming,
-                        onSelect = {
-                            onConfigChange(config.copy(orientation = StreamOrientation.LANDSCAPE))
+                    // Wi-Fi / Cast Icon Box
+                    Box(
+                        modifier = Modifier
+                            .size(42.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(StudioBlack),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Tv,
+                            contentDescription = null,
+                            tint = PureWhite,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+
+                    Column {
+                        Text(
+                            text = "YAYIN ADRESİ (TARAYICIDAN GİRİN)",
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 0.6.sp,
+                            color = TextSubtle
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = streamUrl,
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = StudioBlack,
+                            fontFamily = FontFamily.Monospace
+                        )
+                    }
+                }
+
+                // Quick Action Buttons
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    StudioActionButton(
+                        icon = Icons.Default.ContentCopy,
+                        tooltip = "Kopyala",
+                        onClick = {
+                            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                            clipboard.setPrimaryClip(ClipData.newPlainText("YC Live Adresi", streamUrl))
+                            Toast.makeText(context, "Yayın adresi kopyalandı!", Toast.LENGTH_SHORT).show()
                         }
                     )
-                    OrientationSelectCard(
-                        modifier = Modifier.weight(1f),
-                        title = "Dikey Mod",
-                        subtitle = "Telefon / Reels",
-                        icon = Icons.Default.PhoneAndroid,
-                        isSelected = config.orientation == StreamOrientation.PORTRAIT,
-                        enabled = !isStreaming,
-                        onSelect = {
-                            onConfigChange(config.copy(orientation = StreamOrientation.PORTRAIT))
+                    StudioActionButton(
+                        icon = Icons.Default.Share,
+                        tooltip = "Paylaş",
+                        onClick = {
+                            val sendIntent = Intent().apply {
+                                action = Intent.ACTION_SEND
+                                putExtra(Intent.EXTRA_TEXT, streamUrl)
+                                type = "text/plain"
+                            }
+                            context.startActivity(Intent.createChooser(sendIntent, "Yayın Adresini Paylaş"))
                         }
                     )
                 }
             }
         }
 
-        // Card 2: Quality & FPS
+        // [3] HERO ACTION BUTTON (High-Contrast, Pure White Text and Icon, Always 100% Readable)
+        StudioHeroActionButton(
+            isStreaming = isStreaming,
+            onClick = onToggleStream
+        )
+
+        // [4] PRO STREAMER FEATURES BADGE ROW (Visual Polish & Brand Image)
+        ProStreamerFeatureRow()
+    }
+}
+
+// -------------------------------------------------------------------------------------------------
+// 4. TAB 2: STUDIO SETTINGS (Orientation, Strict 60/90 FPS, Bitrate)
+// -------------------------------------------------------------------------------------------------
+@Composable
+private fun StudioSettingsTab(
+    config: StreamConfig,
+    isStreaming: Boolean,
+    onConfigChange: (StreamConfig) -> Unit
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(14.dp)
+    ) {
+        // Card 1: Orientation Presets (Yatay / Dikey / Otomatik)
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .shadow(elevation = 3.dp, shape = RoundedCornerShape(26.dp), spotColor = Color(0x12000000)),
-            shape = RoundedCornerShape(26.dp),
+                .shadow(elevation = 3.dp, shape = RoundedCornerShape(24.dp), spotColor = Color(0x12000000)),
+            shape = RoundedCornerShape(24.dp),
             colors = CardDefaults.cardColors(containerColor = CardSurface),
             border = androidx.compose.foundation.BorderStroke(1.dp, CardBorder)
         ) {
-            Column(modifier = Modifier.padding(20.dp)) {
+            Column(modifier = Modifier.padding(18.dp)) {
                 Text(
-                    text = "Kare Hızı (FPS)",
+                    text = "Ekran Yönü & En-Boy Oranı",
                     fontSize = 17.sp,
                     fontWeight = FontWeight.Bold,
                     color = TextTitle
                 )
                 Text(
-                    text = "Yüksek yenileme hızında rekabetçi tepki süresi",
+                    text = "Yatay modda oyunun 20:9 / 16:9 geniş ekranı korunur, kareleşme olmaz",
                     fontSize = 12.sp,
                     color = TextSubtle
                 )
@@ -594,34 +653,101 @@ private fun AppleSettingsTab(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
+                    OrientationSelectCard(
+                        modifier = Modifier.weight(1f),
+                        title = "Yatay Mod",
+                        subtitle = "PUBG & Oyun",
+                        icon = Icons.Default.Tv,
+                        isSelected = config.orientation == StreamOrientation.LANDSCAPE,
+                        enabled = !isStreaming,
+                        onSelect = { onConfigChange(config.copy(orientation = StreamOrientation.LANDSCAPE)) }
+                    )
+                    OrientationSelectCard(
+                        modifier = Modifier.weight(1f),
+                        title = "Dikey Mod",
+                        subtitle = "Telefon / Reels",
+                        icon = Icons.Default.PhoneAndroid,
+                        isSelected = config.orientation == StreamOrientation.PORTRAIT,
+                        enabled = !isStreaming,
+                        onSelect = { onConfigChange(config.copy(orientation = StreamOrientation.PORTRAIT)) }
+                    )
+                    OrientationSelectCard(
+                        modifier = Modifier.weight(1f),
+                        title = "Otomatik",
+                        subtitle = "Cihaz Yönü",
+                        icon = Icons.Default.Tv,
+                        isSelected = config.orientation == StreamOrientation.AUTO,
+                        enabled = !isStreaming,
+                        onSelect = { onConfigChange(config.copy(orientation = StreamOrientation.AUTO)) }
+                    )
+                }
+            }
+        }
+
+        // Card 2: Strict FPS Limiter (60 vs 90 FPS)
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .shadow(elevation = 3.dp, shape = RoundedCornerShape(24.dp), spotColor = Color(0x12000000)),
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(containerColor = CardSurface),
+            border = androidx.compose.foundation.BorderStroke(1.dp, CardBorder)
+        ) {
+            Column(modifier = Modifier.padding(18.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        Text(
+                            text = "Kare Hızı (FPS) Sabitleyici",
+                            fontSize = 17.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = TextTitle
+                        )
+                        Text(
+                            text = "120Hz ekranlarda gereksiz kareler kısıtlanır, Wi-Fi gecikmesi 0ms kalır",
+                            fontSize = 12.sp,
+                            color = TextSubtle
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(14.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
                     SegmentedChoicePill(
                         modifier = Modifier.weight(1f),
-                        title = "60 FPS",
-                        subtitle = "Standart Akıcı",
+                        title = "60 FPS (Önerilen)",
+                        subtitle = "Kararlı 0ms Gecikme",
                         isSelected = config.fps == StreamConfig.FPS_60,
                         enabled = !isStreaming,
                         onSelect = { onConfigChange(config.copy(fps = StreamConfig.FPS_60)) }
                     )
                     SegmentedChoicePill(
                         modifier = Modifier.weight(1f),
-                        title = "90 FPS",
-                        subtitle = "Ultra Hızlı",
+                        title = "90 FPS (Ultra)",
+                        subtitle = "Yüksek Hızlı Ekran",
                         isSelected = config.fps == StreamConfig.FPS_90,
                         enabled = !isStreaming,
                         onSelect = { onConfigChange(config.copy(fps = StreamConfig.FPS_90)) }
                     )
                 }
 
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(18.dp))
 
                 Text(
-                    text = "Bitrate & Netlik",
+                    text = "Donanımsal Bitrate (CBR)",
                     fontSize = 17.sp,
                     fontWeight = FontWeight.Bold,
                     color = TextTitle
                 )
                 Text(
-                    text = "Yerel Wi-Fi band genişliğinize göre seçin",
+                    text = "Wi-Fi sinyalinize uygun sabit bant genişliği seçin",
                     fontSize = 12.sp,
                     color = TextSubtle
                 )
@@ -635,7 +761,7 @@ private fun AppleSettingsTab(
                     SegmentedChoicePill(
                         modifier = Modifier.weight(1f),
                         title = "15 Mbps",
-                        subtitle = "Hafif",
+                        subtitle = "Hafif / Düşük Ağ",
                         isSelected = config.bitrate == StreamConfig.BITRATE_15_MBPS,
                         enabled = !isStreaming,
                         onSelect = { onConfigChange(config.copy(bitrate = StreamConfig.BITRATE_15_MBPS)) }
@@ -643,7 +769,7 @@ private fun AppleSettingsTab(
                     SegmentedChoicePill(
                         modifier = Modifier.weight(1f),
                         title = "25 Mbps",
-                        subtitle = "Önerilen",
+                        subtitle = "Kristal Netlik",
                         isSelected = config.bitrate == StreamConfig.BITRATE_25_MBPS,
                         enabled = !isStreaming,
                         onSelect = { onConfigChange(config.copy(bitrate = StreamConfig.BITRATE_25_MBPS)) }
@@ -651,7 +777,7 @@ private fun AppleSettingsTab(
                     SegmentedChoicePill(
                         modifier = Modifier.weight(1f),
                         title = "35 Mbps",
-                        subtitle = "Ultra FHD",
+                        subtitle = "Ultra HD Rekabetçi",
                         isSelected = config.bitrate == StreamConfig.BITRATE_35_MBPS,
                         enabled = !isStreaming,
                         onSelect = { onConfigChange(config.copy(bitrate = StreamConfig.BITRATE_35_MBPS)) }
@@ -663,47 +789,50 @@ private fun AppleSettingsTab(
 }
 
 // -------------------------------------------------------------------------------------------------
-// 5. TAB 3: APPLE DEVICE TAB (Local Network & Status)
+// 5. TAB 3: STUDIO SYSTEM TAB (System Specs & Diagnostic)
 // -------------------------------------------------------------------------------------------------
 @Composable
-private fun AppleDeviceTab(
+private fun StudioSystemTab(
     localIp: String,
     streamUrl: String,
-    isStreaming: Boolean
+    isStreaming: Boolean,
+    config: StreamConfig
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .shadow(elevation = 3.dp, shape = RoundedCornerShape(26.dp), spotColor = Color(0x12000000)),
-        shape = RoundedCornerShape(26.dp),
+            .shadow(elevation = 3.dp, shape = RoundedCornerShape(24.dp), spotColor = Color(0x12000000)),
+        shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(containerColor = CardSurface),
         border = androidx.compose.foundation.BorderStroke(1.dp, CardBorder)
     ) {
         Column(
-            modifier = Modifier.padding(22.dp),
+            modifier = Modifier.padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             Text(
-                text = "Ağ ve Bağlantı Bilgisi",
+                text = "Stüdyo Ağ & Donanım Özellikleri",
                 fontSize = 17.sp,
                 fontWeight = FontWeight.Bold,
                 color = TextTitle
             )
 
-            InfoRowItem(label = "Cihaz Yerel IP", value = localIp)
-            InfoRowItem(label = "HTTP Sunucu Portu", value = "8080")
-            InfoRowItem(label = "WebSocket Protokolü", value = "ws://$localIp:8080/ws")
-            InfoRowItem(label = "Video Kodlayıcı", value = "Donanımsal MediaCodec H.264")
-            InfoRowItem(label = "Yayın Durumu", value = if (isStreaming) "Aktif Yayında" else "Boşta")
+            InfoRowItem(label = "Yerel Ağ IP Adresi", value = localIp)
+            InfoRowItem(label = "Ktor CIO Port", value = "8080")
+            InfoRowItem(label = "WebSocket Akışı", value = "ws://$localIp:8080/ws")
+            InfoRowItem(label = "Hedef Donanım FPS", value = "${config.fps} FPS Sabit")
+            InfoRowItem(label = "Encoder Profili", value = "H.264 Baseline Level 4.2")
+            InfoRowItem(label = "Gecikme Modu", value = "Turbo CBR Latency: 0")
+            InfoRowItem(label = "Yayın Durumu", value = if (isStreaming) "Canlı Yayında" else "Boşta / Bekliyor")
         }
     }
 }
 
 // -------------------------------------------------------------------------------------------------
-// 6. HERO CAPSULE ACTION BUTTON (Matching Reference: "Ready? Let's Go!")
+// 6. HERO ACTION BUTTON (High-Contrast, Pure White Text and Icon, Crystal Clear Visibility)
 // -------------------------------------------------------------------------------------------------
 @Composable
-private fun AppleHeroActionButton(
+private fun StudioHeroActionButton(
     isStreaming: Boolean,
     onClick: () -> Unit
 ) {
@@ -720,14 +849,19 @@ private fun AppleHeroActionButton(
             .fillMaxWidth()
             .height(58.dp)
             .scale(scale)
+            .border(
+                width = 1.dp,
+                color = if (isStreaming) Color(0x33FFFFFF) else StudioLightGrey.copy(alpha = 0.4f),
+                shape = CircleShape
+            )
             .shadow(
-                elevation = 6.dp,
+                elevation = 8.dp,
                 shape = CircleShape,
-                spotColor = if (isStreaming) Color(0x33E11D48) else Color(0x3318181B)
+                spotColor = if (isStreaming) Color(0x40E11D48) else Color(0x40121214)
             ),
         shape = CircleShape,
         colors = ButtonDefaults.buttonColors(
-            containerColor = if (isStreaming) AlertRed else DockBg,
+            containerColor = if (isStreaming) AlertRed else StudioBlack,
             contentColor = PureWhite
         )
     ) {
@@ -738,53 +872,68 @@ private fun AppleHeroActionButton(
             Icon(
                 imageVector = if (isStreaming) Icons.Default.Stop else Icons.Default.PlayArrow,
                 contentDescription = null,
-                modifier = Modifier.size(20.dp)
+                tint = PureWhite, // 100% EXPLICIT PURE WHITE
+                modifier = Modifier.size(22.dp)
             )
             Text(
                 text = if (isStreaming) "Yayını Sonlandır" else "Yayını Başlat",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                letterSpacing = (-0.2).sp
+                fontSize = 17.sp,
+                fontWeight = FontWeight.ExtraBold,
+                letterSpacing = (-0.2).sp,
+                color = PureWhite // 100% EXPLICIT PURE WHITE - NEVER BLACK
             )
         }
     }
 }
 
 // -------------------------------------------------------------------------------------------------
-// 7. FLOATING APPLE DOCK BAR (Direct match to Screen 2 & 3 in reference image)
+// 7. TRUE LIQUID GLASS FLOATING ISLAND DOCK BAR (Translucent, Glass Highlight, Spring Pill)
 // -------------------------------------------------------------------------------------------------
 @Composable
-private fun FloatingAppleDockBar(
+private fun LiquidGlassFloatingIsland(
     selectedTab: Int,
     onSelectTab: (Int) -> Unit
 ) {
     val items = listOf(
-        Pair(Icons.Default.Tv, "Yayın"),
+        Pair(Icons.Default.Tv, "Stüdyo"),
         Pair(Icons.Default.Settings, "Ayarlar"),
-        Pair(Icons.Default.PhoneAndroid, "Cihaz")
+        Pair(Icons.Default.PhoneAndroid, "Sistem")
     )
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 48.dp, end = 48.dp, bottom = 22.dp),
+            .padding(start = 44.dp, end = 44.dp, bottom = 22.dp),
         contentAlignment = Alignment.Center
     ) {
+        // Liquid Glass Capsule Dock
         Box(
             modifier = Modifier
                 .clip(CircleShape)
-                .background(DockBg)
-                .shadow(elevation = 10.dp, shape = CircleShape)
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            Color(0xF2FFFFFF),
+                            Color(0xE6F1F3F7)
+                        )
+                    )
+                )
+                .border(1.5.dp, Color(0x80FFFFFF), CircleShape)
+                .shadow(
+                    elevation = 16.dp,
+                    shape = CircleShape,
+                    spotColor = Color(0x20000000)
+                )
                 .padding(horizontal = 14.dp, vertical = 8.dp)
         ) {
             Row(
-                horizontalArrangement = Arrangement.spacedBy(18.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 items.forEachIndexed { index, item ->
                     val isSelected = selectedTab == index
                     val animScale by animateFloatAsState(
-                        targetValue = if (isSelected) 1.0f else 0.95f,
+                        targetValue = if (isSelected) 1.0f else 0.94f,
                         animationSpec = spring(stiffness = Spring.StiffnessMedium),
                         label = "dockScale"
                     )
@@ -794,7 +943,12 @@ private fun FloatingAppleDockBar(
                             .size(46.dp)
                             .scale(animScale)
                             .clip(CircleShape)
-                            .background(if (isSelected) DockPillActive else Color.Transparent)
+                            .background(if (isSelected) StudioBlack else Color.Transparent)
+                            .border(
+                                width = if (isSelected) 1.dp else 0.dp,
+                                color = if (isSelected) StudioLightGrey.copy(alpha = 0.3f) else Color.Transparent,
+                                shape = CircleShape
+                            )
                             .clickable(
                                 interactionSource = remember { MutableInteractionSource() },
                                 indication = null
@@ -804,7 +958,7 @@ private fun FloatingAppleDockBar(
                         Icon(
                             imageVector = item.first,
                             contentDescription = item.second,
-                            tint = if (isSelected) DockIconActive else DockIconInactive,
+                            tint = if (isSelected) PureWhite else TextSubtle,
                             modifier = Modifier.size(22.dp)
                         )
                     }
@@ -815,27 +969,117 @@ private fun FloatingAppleDockBar(
 }
 
 // -------------------------------------------------------------------------------------------------
-// SUB-COMPONENTS & HELPERS
+// SUB-COMPONENTS, PRO BADGES & ANIMATIONS
 // -------------------------------------------------------------------------------------------------
 @Composable
-private fun SmallActionButton(
+private fun StudioActionButton(
     icon: ImageVector,
+    tooltip: String,
     onClick: () -> Unit
 ) {
     Box(
         modifier = Modifier
-            .size(34.dp)
-            .clip(CircleShape)
-            .background(Color(0x33FFFFFF))
+            .size(38.dp)
+            .clip(RoundedCornerShape(10.dp))
+            .background(PillBgInactive)
+            .border(1.dp, StudioBorder.copy(alpha = 0.4f), RoundedCornerShape(10.dp))
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
         Icon(
             imageVector = icon,
-            contentDescription = null,
-            tint = PureWhite,
-            modifier = Modifier.size(16.dp)
+            contentDescription = tooltip,
+            tint = StudioBlack,
+            modifier = Modifier.size(18.dp)
         )
+    }
+}
+
+@Composable
+private fun ProStreamerFeatureRow() {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        ProBadgeItem(modifier = Modifier.weight(1f), title = "Turbo CBR", subtitle = "Düşük Gecikme")
+        ProBadgeItem(modifier = Modifier.weight(1f), title = "60 FPS Sabit", subtitle = "Sıfır Dalgalanma")
+        ProBadgeItem(modifier = Modifier.weight(1f), title = "Oyun Modu", subtitle = "PUBG / 20:9 Uyumlu")
+    }
+}
+
+@Composable
+private fun ProBadgeItem(
+    modifier: Modifier = Modifier,
+    title: String,
+    subtitle: String
+) {
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(14.dp))
+            .background(PillBgInactive.copy(alpha = 0.8f))
+            .padding(vertical = 10.dp, horizontal = 6.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                text = title,
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Bold,
+                color = StudioBlack
+            )
+            Spacer(modifier = Modifier.height(1.dp))
+            Text(
+                text = subtitle,
+                fontSize = 9.sp,
+                color = TextSubtle
+            )
+        }
+    }
+}
+
+@Composable
+private fun StreamingEqualizerBars() {
+    val transition = rememberInfiniteTransition(label = "equalizer")
+    val h1 by transition.animateFloat(
+        initialValue = 8f, targetValue = 28f,
+        animationSpec = infiniteRepeatable(tween(350, easing = LinearEasing), RepeatMode.Reverse),
+        label = "h1"
+    )
+    val h2 by transition.animateFloat(
+        initialValue = 22f, targetValue = 10f,
+        animationSpec = infiniteRepeatable(tween(280, easing = LinearEasing), RepeatMode.Reverse),
+        label = "h2"
+    )
+    val h3 by transition.animateFloat(
+        initialValue = 12f, targetValue = 32f,
+        animationSpec = infiniteRepeatable(tween(420, easing = LinearEasing), RepeatMode.Reverse),
+        label = "h3"
+    )
+    val h4 by transition.animateFloat(
+        initialValue = 26f, targetValue = 8f,
+        animationSpec = infiniteRepeatable(tween(310, easing = LinearEasing), RepeatMode.Reverse),
+        label = "h4"
+    )
+    val h5 by transition.animateFloat(
+        initialValue = 10f, targetValue = 24f,
+        animationSpec = infiniteRepeatable(tween(390, easing = LinearEasing), RepeatMode.Reverse),
+        label = "h5"
+    )
+
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalAlignment = Alignment.Bottom,
+        modifier = Modifier.height(34.dp)
+    ) {
+        listOf(h1, h2, h3, h4, h5).forEach { barH ->
+            Box(
+                modifier = Modifier
+                    .width(4.dp)
+                    .height(barH.dp)
+                    .clip(RoundedCornerShape(2.dp))
+                    .background(PureWhite)
+            )
+        }
     }
 }
 
@@ -849,9 +1093,9 @@ private fun StatPillCard(
 ) {
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(18.dp))
+            .clip(RoundedCornerShape(16.dp))
             .background(PillBgInactive)
-            .padding(vertical = 12.dp, horizontal = 10.dp),
+            .padding(vertical = 12.dp, horizontal = 8.dp),
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -864,8 +1108,8 @@ private fun StatPillCard(
             Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = value,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.ExtraBold,
                 color = accentColor
             )
             Spacer(modifier = Modifier.height(2.dp))
@@ -888,35 +1132,35 @@ private fun OrientationSelectCard(
     enabled: Boolean,
     onSelect: () -> Unit
 ) {
-    val borderColor = if (isSelected) DockBg else CardBorder
+    val borderColor = if (isSelected) StudioBlack else CardBorder
     val bgColor = if (isSelected) PillBgInactive else CardSurface
 
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(20.dp))
+            .clip(RoundedCornerShape(18.dp))
             .background(bgColor)
-            .border(if (isSelected) 2.dp else 1.dp, borderColor, RoundedCornerShape(20.dp))
+            .border(if (isSelected) 2.dp else 1.dp, borderColor, RoundedCornerShape(18.dp))
             .clickable(enabled = enabled, onClick = onSelect)
-            .padding(16.dp),
+            .padding(14.dp),
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = if (isSelected) DockBg else TextSubtle,
-                modifier = Modifier.size(28.dp)
+                tint = if (isSelected) StudioBlack else TextSubtle,
+                modifier = Modifier.size(24.dp)
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(6.dp))
             Text(
                 text = title,
-                fontSize = 14.sp,
+                fontSize = 13.sp,
                 fontWeight = FontWeight.Bold,
                 color = if (isSelected) TextDark else TextSubtle
             )
             Text(
                 text = subtitle,
-                fontSize = 11.sp,
+                fontSize = 10.sp,
                 color = TextSubtle
             )
         }
@@ -932,9 +1176,9 @@ private fun SegmentedChoicePill(
     enabled: Boolean,
     onSelect: () -> Unit
 ) {
-    val bgColor = if (isSelected) DockBg else PillBgInactive
+    val bgColor = if (isSelected) StudioBlack else PillBgInactive
     val titleColor = if (isSelected) PureWhite else TextDark
-    val subColor = if (isSelected) Color(0xFFD1D5DB) else TextSubtle
+    val subColor = if (isSelected) StudioLightGrey else TextSubtle
 
     Box(
         modifier = modifier
@@ -975,7 +1219,7 @@ private fun InfoRowItem(label: String, value: String) {
         Text(
             text = value,
             fontSize = 13.sp,
-            fontWeight = FontWeight.SemiBold,
+            fontWeight = FontWeight.Bold,
             color = TextDark,
             fontFamily = FontFamily.Monospace
         )

@@ -4,20 +4,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>YC Live - Apple Liquid Glass Mirror</title>
+  <title>YC Live - Pro Liquid Glass Studio Mirror</title>
   <script src="/jmuxer.min.js"></script>
   <style>
     :root {
-      --bg-canvas: #09090B;
+      --bg-studio: #0B0B0E;
       --glass-surface: rgba(255, 255, 255, 0.08);
-      --glass-surface-hover: rgba(255, 255, 255, 0.14);
-      --glass-border: rgba(255, 255, 255, 0.14);
-      --glass-border-bright: rgba(255, 255, 255, 0.28);
+      --glass-surface-hover: rgba(255, 255, 255, 0.15);
+      --glass-border: rgba(255, 255, 255, 0.16);
+      --glass-border-bright: rgba(255, 255, 255, 0.35);
       --text-pure: #FFFFFF;
-      --text-muted: #A1A1AA;
+      --text-muted: #D4D4D8;
       --text-dim: #71717A;
       --live-green: #10B981;
-      --apple-blur: blur(28px) saturate(180%);
+      --live-cyan: #38BDF8;
+      --apple-blur: blur(32px) saturate(190%);
     }
 
     * {
@@ -32,7 +33,7 @@
     body {
       width: 100%;
       height: 100%;
-      background-color: var(--bg-canvas);
+      background-color: var(--bg-studio);
       color: var(--text-pure);
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif;
       overflow: hidden;
@@ -55,9 +56,10 @@
       display: block;
       outline: none;
       background: transparent;
+      transition: object-fit 0.2s ease;
     }
 
-    /* Minimalist Apple Frosted Glass Top HUD */
+    /* Minimalist Pro Studio Liquid Glass HUD */
     .hud-bar {
       position: absolute;
       top: 18px;
@@ -73,7 +75,7 @@
 
     .hud-bar.hidden {
       opacity: 0;
-      transform: translateY(-10px);
+      transform: translateY(-12px);
     }
 
     .hud-group {
@@ -88,7 +90,7 @@
       border: 1px solid var(--glass-border);
       backdrop-filter: var(--apple-blur);
       -webkit-backdrop-filter: var(--apple-blur);
-      padding: 7px 14px;
+      padding: 7px 15px;
       border-radius: 9999px;
       font-size: 13px;
       font-weight: 500;
@@ -96,21 +98,34 @@
       display: flex;
       align-items: center;
       gap: 7px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.16);
     }
 
+    /* Square Studio Logo Mark */
     .brand-mark {
       font-weight: 700;
-      letter-spacing: 0.3px;
+      letter-spacing: 0.4px;
       color: #FFFFFF;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
     }
 
-    .brand-mark svg {
-      width: 16px;
-      height: 16px;
+    .square-logo-box {
+      width: 20px;
+      height: 20px;
+      border-radius: 5px;
+      background: #141416;
+      border: 1px solid #E4E4E7;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+    }
+
+    .square-logo-box svg {
+      width: 12px;
+      height: 12px;
       fill: #FFFFFF;
     }
 
@@ -124,8 +139,8 @@
 
     .status-dot.live {
       background-color: var(--live-green);
-      box-shadow: 0 0 10px var(--live-green);
-      animation: pulseLive 1.8s infinite;
+      box-shadow: 0 0 12px var(--live-green);
+      animation: pulseLive 1.6s infinite;
     }
 
     @keyframes pulseLive {
@@ -134,8 +149,8 @@
         transform: scale(1);
       }
       50% {
-        opacity: 0.4;
-        transform: scale(1.18);
+        opacity: 0.35;
+        transform: scale(1.2);
       }
     }
 
@@ -156,7 +171,7 @@
       background: var(--glass-surface);
       border: 1px solid var(--glass-border);
       color: #FFFFFF;
-      padding: 7px 15px;
+      padding: 7px 16px;
       border-radius: 9999px;
       font-size: 12px;
       font-weight: 600;
@@ -164,7 +179,7 @@
       cursor: pointer;
       backdrop-filter: var(--apple-blur);
       -webkit-backdrop-filter: var(--apple-blur);
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.16);
       transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
@@ -176,7 +191,7 @@
 
     .apple-btn:active {
       transform: translateY(0);
-      background: rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.22);
     }
 
     /* Center Status Overlay */
@@ -185,13 +200,13 @@
       text-align: center;
       pointer-events: none;
       z-index: 20;
-      background: rgba(22, 22, 25, 0.78);
-      backdrop-filter: blur(40px) saturate(190%);
-      -webkit-backdrop-filter: blur(40px) saturate(190%);
-      padding: 34px 44px;
-      border-radius: 26px;
+      background: rgba(18, 18, 22, 0.82);
+      backdrop-filter: blur(44px) saturate(200%);
+      -webkit-backdrop-filter: blur(44px) saturate(200%);
+      padding: 36px 48px;
+      border-radius: 28px;
       border: 1px solid var(--glass-border);
-      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+      box-shadow: 0 28px 70px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.18);
       transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
@@ -202,7 +217,7 @@
     }
 
     #center-card h2 {
-      font-size: 19px;
+      font-size: 20px;
       font-weight: 700;
       letter-spacing: -0.3px;
       margin-bottom: 6px;
@@ -212,17 +227,17 @@
     #center-card p {
       font-size: 13px;
       color: var(--text-muted);
-      line-height: 1.45;
+      line-height: 1.5;
     }
 
     .ios-spinner {
-      margin: 18px auto 0;
+      margin: 20px auto 0;
       width: 28px;
       height: 28px;
       border: 2.5px solid rgba(255, 255, 255, 0.15);
       border-top-color: #FFFFFF;
       border-radius: 50%;
-      animation: spin 0.8s linear infinite;
+      animation: spin 0.75s linear infinite;
     }
 
     @keyframes spin {
@@ -235,12 +250,14 @@
 
 <body>
   <div id="viewport">
-    <!-- Apple Liquid Glass Top HUD -->
+    <!-- Apple Pro Studio Liquid Glass Top HUD -->
     <div class="hud-bar" id="hud">
       <div class="hud-group">
         <div class="hud-pill">
           <span class="brand-mark">
-            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"/></svg>
+            <span class="square-logo-box">
+              <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"/></svg>
+            </span>
             YC LIVE
           </span>
         </div>
@@ -262,7 +279,7 @@
         </div>
         <div class="hud-pill">
           <span style="color:var(--text-dim)">GECİKME:</span>
-          <span class="num-val" style="color:#10B981">&lt;40ms</span>
+          <span class="num-val" style="color:#10B981" id="lag-label">&lt;25ms (SIFIR)</span>
         </div>
       </div>
 
@@ -275,8 +292,8 @@
 
     <!-- Center Connecting Overlay -->
     <div id="center-card">
-      <h2 id="card-title">YC LIVE BAĞLANTISI</h2>
-      <p id="card-sub">Android cihazından H.264 ultra düşük gecikmeli akış bekleniyor...</p>
+      <h2 id="card-title">YC LIVE PRO STUDIO</h2>
+      <p id="card-sub">Android donanımsal H.264 60 FPS ultra düşük gecikmeli akış başlatılıyor...</p>
       <div class="ios-spinner" id="spinner"></div>
     </div>
 
@@ -294,6 +311,7 @@
       const fpsLabel = document.getElementById('fps-label');
       const bitrateLabel = document.getElementById('bitrate-label');
       const resLabel = document.getElementById('res-label');
+      const lagLabel = document.getElementById('lag-label');
       const centerCard = document.getElementById('center-card');
       const hud = document.getElementById('hud');
       const btnScale = document.getElementById('btn-scale');
@@ -306,15 +324,17 @@
       let byteCount = 0;
       let lastMetricsTime = performance.now();
       let isLive = false;
-      let fitMode = 'contain';
+      let scaleModeIndex = 0; // 0: contain, 1: cover, 2: fill
+      const scaleModes = ['contain', 'cover', 'fill'];
+      const scaleLabels = ['ÖLÇEK: SIĞDIR', 'ÖLÇEK: DOLDUR', 'ÖLÇEK: ESNET'];
       let isHudVisible = true;
 
       function initJMuxer() {
         if (jmuxer) return;
         try {
           if (typeof JMuxer === 'undefined') {
-            console.warn('JMuxer henüz yüklenmedi, 100ms sonra tekrar denenecek...');
-            setTimeout(initJMuxer, 100);
+            console.warn('JMuxer bekleniyor...');
+            setTimeout(initJMuxer, 80);
             return;
           }
 
@@ -326,12 +346,12 @@
             clearBuffer: true,
             debug: false,
             onError: function (err) {
-              console.warn('JMuxer event:', err);
+              console.warn('JMuxer log:', err);
             }
           });
-          console.log('JMuxer sıfır gecikme motoru başarıyla başlatıldı.');
+          console.log('JMuxer Pro 60FPS sıfır gecikme motoru hazır.');
         } catch (e) {
-          console.error('JMuxer ilklendirme hatası:', e);
+          console.error('JMuxer hatası:', e);
         }
       }
 
@@ -347,7 +367,9 @@
 
       function updateResolution() {
         if (video.videoWidth > 0 && video.videoHeight > 0) {
-          resLabel.innerText = `${video.videoWidth}x${video.videoHeight}`;
+          const ratio = (video.videoWidth / video.videoHeight).toFixed(2);
+          const orientationTag = video.videoWidth >= video.videoHeight ? 'Yatay' : 'Dikey';
+          resLabel.innerText = `${video.videoWidth}x${video.videoHeight} (${orientationTag})`;
         }
       }
 
@@ -362,16 +384,36 @@
       video.addEventListener('loadedmetadata', updateResolution);
       video.addEventListener('resize', updateResolution);
 
-      video.addEventListener('timeupdate', () => {
-        onLiveStreamActive();
-        // Aggressive Live Edge Chase for 0-40ms latency
+      // Heavy Latency Optimizer: Micro-playback rate adjustment + Instant snap
+      function optimizeLatency() {
         if (video.buffered.length > 0) {
           const end = video.buffered.end(video.buffered.length - 1);
           const drift = end - video.currentTime;
+
+          // If drift exceeds 80ms (network hiccup), snap directly to live edge
           if (drift > 0.08) {
             video.currentTime = end - 0.01;
+          } else if (drift > 0.035) {
+            // Smoothly drain the buffer without audio/video dropouts
+            video.playbackRate = 1.05;
+          } else if (drift < 0.015) {
+            video.playbackRate = 1.0;
+          }
+
+          const ms = Math.max(5, Math.round(drift * 1000));
+          if (ms < 40) {
+            lagLabel.innerText = `<${ms}ms (SIFIR)`;
+            lagLabel.style.color = '#10B981';
+          } else {
+            lagLabel.innerText = `${ms}ms`;
+            lagLabel.style.color = '#F59E0B';
           }
         }
+      }
+
+      video.addEventListener('timeupdate', () => {
+        onLiveStreamActive();
+        optimizeLatency();
       });
 
       function connectWebSocket() {
@@ -387,7 +429,7 @@
         ws.binaryType = 'arraybuffer';
 
         ws.onopen = () => {
-          console.log('YC Live WebSocket bağlantısı kuruldu.');
+          console.log('YC Live Pro WebSocket bağlantısı kuruldu.');
           statusTitle.innerText = 'AKIS BEKLENİYOR...';
         };
 
@@ -438,19 +480,14 @@
           lastMetricsTime = now;
         }
         updateResolution();
+        optimizeLatency();
       }, 1000);
 
-      // Button Controls
+      // Button Controls: Cycle 3 view modes
       btnScale.addEventListener('click', () => {
-        if (fitMode === 'contain') {
-          fitMode = 'cover';
-          video.style.objectFit = 'cover';
-          btnScale.innerText = 'ÖLÇEK: DOLDUR';
-        } else {
-          fitMode = 'contain';
-          video.style.objectFit = 'contain';
-          btnScale.innerText = 'ÖLÇEK: SIĞDIR';
-        }
+        scaleModeIndex = (scaleModeIndex + 1) % scaleModes.length;
+        video.style.objectFit = scaleModes[scaleModeIndex];
+        btnScale.innerText = scaleLabels[scaleModeIndex];
       });
 
       btnFullscreen.addEventListener('click', () => {

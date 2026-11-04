@@ -3,8 +3,9 @@ package com.yclive.streamer
 import java.io.Serializable
 
 enum class StreamOrientation : Serializable {
-    LANDSCAPE, // Yatay - PUBG Mobile, CoD, emülatörler, rekabetçi oyunlar
-    PORTRAIT   // Dikey - Genel telefon kullanımı, TikTok, Shorts vb.
+    AUTO,      // Otomatik - Cihazın dikey/yatay modunu algılar (En akıcı ve doğru oran)
+    LANDSCAPE, // Yatay - PUBG Mobile, CoD, rekabetçi oyunlar için 16:9 / 20:9
+    PORTRAIT   // Dikey - TikTok, Reels, dikey uygulamalar için 9:16
 }
 
 data class StreamConfig(
@@ -14,25 +15,32 @@ data class StreamConfig(
     val bitrate: Int = 25_000_000 // 25 Mbps
 ) : Serializable {
 
+    // Helper to align dimensions to multiple of 16 for hardware MediaCodec
+    private fun align16(value: Int): Int = (value + 15) / 16 * 16
+
     val width: Int
-        get() = if (orientation == StreamOrientation.LANDSCAPE) {
-            if (baseResolution == 720) 1280 else 1920
-        } else {
-            if (baseResolution == 720) 720 else 1080
+        get() = when (orientation) {
+            StreamOrientation.LANDSCAPE -> if (baseResolution == 720) 1280 else 1920
+            StreamOrientation.PORTRAIT -> if (baseResolution == 720) 720 else 1080
+            StreamOrientation.AUTO -> if (baseResolution == 720) 1280 else 1920
         }
 
     val height: Int
-        get() = if (orientation == StreamOrientation.LANDSCAPE) {
-            if (baseResolution == 720) 720 else 1080
-        } else {
-            if (baseResolution == 720) 1280 else 1920
+        get() = when (orientation) {
+            StreamOrientation.LANDSCAPE -> if (baseResolution == 720) 720 else 1080
+            StreamOrientation.PORTRAIT -> if (baseResolution == 720) 1280 else 1920
+            StreamOrientation.AUTO -> if (baseResolution == 720) 720 else 1080
         }
 
     val bitrateMbps: Int
         get() = bitrate / 1_000_000
 
     val resolutionLabel: String
-        get() = "${width}x${height} (${if (orientation == StreamOrientation.LANDSCAPE) "Yatay" else "Dikey"})"
+        get() = when (orientation) {
+            StreamOrientation.LANDSCAPE -> "${width}x${height} (Yatay 16:9)"
+            StreamOrientation.PORTRAIT -> "${width}x${height} (Dikey 9:16)"
+            StreamOrientation.AUTO -> "${width}x${height} (Otomatik)"
+        }
 
     companion object {
         const val RES_720P = 720

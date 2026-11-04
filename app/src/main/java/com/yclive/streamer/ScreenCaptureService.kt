@@ -186,21 +186,29 @@ class ScreenCaptureService : Service() {
     }
 
     private fun setupEncoderAndDisplay(mp: MediaProjection) {
+        val metrics = resources.displayMetrics
+        val screenW = metrics.widthPixels
+        val screenH = metrics.heightPixels
+        val (targetW, targetH) = calculateStreamDimensions(config, screenW, screenH)
+
+        Log.i(tag, "Yayın çözünürlüğü hesaplandı: ${targetW}x${targetH} (Cihaz ekranı: ${screenW}x${screenH}, Yön: ${config.orientation})")
+
         val format = MediaFormat.createVideoFormat(
             MediaFormat.MIMETYPE_VIDEO_AVC,
-            config.width,
-            config.height
+            targetW,
+            targetH
         ).apply {
             setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface)
             setInteger(MediaFormat.KEY_BIT_RATE, config.bitrate)
             setInteger(MediaFormat.KEY_FRAME_RATE, config.fps)
             setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 1) // 1 second keyframe interval
 
-            // Repeat previous frame to maintain constant flow if screen doesn't change
-            try {
-                val repeatUs = (1_000_000L / config.fps)
-                setLong(MediaFormat.KEY_REPEAT_PREVIOUS_FRAME_AFTER, repeatUs)
-            } catch (_: Exception) {}
+            // Hardware FPS Limit: strictly throttle 120Hz/144Hz displays to target config.fps
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                try {
+                    setFloat("max-fps-to-encoder", config.fps.toFloat())
+                } catch (_: Exception) {}
+            }
 
             // Constant Bitrate for smooth network stream
             setInteger(MediaFormat.KEY_BITRATE_MODE, MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_CBR)
@@ -213,7 +221,7 @@ class ScreenCaptureService : Service() {
             setInteger(MediaFormat.KEY_PROFILE, MediaCodecInfo.CodecProfileLevel.AVCProfileBaseline)
             setInteger(MediaFormat.KEY_LEVEL, MediaCodecInfo.CodecProfileLevel.AVCLevel42)
 
-            // Hardware low-latency extensions (Qualcomm Snapdragon, etc.)
+            // Hardware low-latency extensions (Qualcomm Snapdragon, MediaTek, etc.)
             try {
                 setInteger("vendor.qcom-ext-enc-low-latency.enable", 1)
             } catch (_: Exception) {}
@@ -227,13 +235,12 @@ class ScreenCaptureService : Service() {
         mediaCodec = encoder
         inputSurface = surface
 
-        val metrics = resources.displayMetrics
         val densityDpi = metrics.densityDpi
 
         virtualDisplay = mp.createVirtualDisplay(
             "YCLiveVirtualDisplay",
-            config.width,
-            config.height,
+            targetW,
+            targetH,
             densityDpi,
             DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
             surface,
@@ -241,14 +248,50 @@ class ScreenCaptureService : Service() {
             null
         )
 
-        // Start reading encoded H.264 NAL units
-        startEncoderDrainLoop(encoder)
+        // Start reading encoded H.264 NAL units with strict FPS pacing
+        startEncoderDrainLoop(encoder, config.fps)
     }
 
-    private fun startEncoderDrainLoop(encoder: MediaCodec) {
+    private fun calculateStreamDimensions(cfg: StreamConfig, screenW: Int, screenH: Int): Pair<Int, Int> {
+        val base = cfg.baseResolution
+        val maxDim = maxOf(screenW, screenH)
+        val minDim = minOf(screenW, screenH)
+        val aspect = maxDim.toFloat() / minDim.toFloat().coerceAtLeast(1f)
+
+        return when (cfg.orientation) {
+            StreamOrientation.LANDSCAPE -> {
+                val h = base
+                val w = align16((h * aspect).toInt())
+                Pair(w, h)
+            }
+            StreamOrientation.PORTRAIT -> {
+                val w = base
+                val h = align16((w * aspect).toInt())
+                Pair(w, h)
+            }
+            StreamOrientation.AUTO -> {
+                if (screenW >= screenH) {
+                    val h = base
+                    val w = align16((h * (screenW.toFloat() / screenH.toFloat())).toInt())
+                    Pair(w, h)
+                } else {
+                    val w = base
+                    val h = align16((w * (screenH.toFloat() / screenW.toFloat())).toInt())
+                    Pair(w, h)
+                }
+            }
+        }
+    }
+
+    private fun align16(v: Int): Int = ((v + 15) / 16) * 16
+
+    private fun startEncoderDrainLoop(encoder: MediaCodec, targetFps: Int) {
         drainJob = serviceScope.launch(Dispatchers.IO) {
             val bufferInfo = MediaCodec.BufferInfo()
-            Log.i(tag, "MediaCodec drain döngüsü aktif.")
+            val minFrameIntervalUs = (1_000_000L / targetFps)
+            var lastEmittedTimeUs = 0L
+
+            Log.i(tag, "MediaCodec drain döngüsü aktif. Hedef FPS: $targetFps (Minimum kare aralığı: ${minFrameIntervalUs}us)")
 
             while (isActive) {
                 try {
@@ -299,6 +342,7 @@ class ScreenCaptureService : Service() {
                                     localStreamServer?.cachedConfigBuffer = frameData
                                     localStreamServer?.broadcastFrame(frameData)
                                 } else if (isKeyFrame) {
+                                    lastEmittedTimeUs = bufferInfo.presentationTimeUs
                                     val cached = localStreamServer?.cachedConfigBuffer
                                     val packetToSend = if (cached != null && !hasSpsHeader(frameData)) {
                                         val combined = ByteArray(cached.size + frameData.size)
@@ -310,7 +354,14 @@ class ScreenCaptureService : Service() {
                                     }
                                     localStreamServer?.broadcastFrame(packetToSend)
                                 } else {
-                                    // Regular P-Frame
+                                    // Regular P-Frame: Strict FPS throttling to eliminate 120Hz Wi-Fi buffer congestion
+                                    val deltaUs = bufferInfo.presentationTimeUs - lastEmittedTimeUs
+                                    if (lastEmittedTimeUs > 0 && deltaUs > 0 && deltaUs < (minFrameIntervalUs * 85 / 100)) {
+                                        // Drop redundant frame produced by high refresh rate screen
+                                        encoder.releaseOutputBuffer(outputBufferIndex, false)
+                                        continue
+                                    }
+                                    lastEmittedTimeUs = bufferInfo.presentationTimeUs
                                     localStreamServer?.broadcastFrame(frameData)
                                 }
                             }

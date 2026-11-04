@@ -3,32 +3,49 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <!-- Refined Minimalist Apple-Style Monochrome Emblem -->
-    <!-- Outer Precision Ring -->
+    <!-- Studio Square / Squircle Outer Body in Obsidian Black -->
     <path
-        android:strokeColor="#FFFFFF"
+        android:fillColor="#141416"
+        android:pathData="M32,20 h44 c7.73,0 14,6.27 14,14 v40 c0,7.73 -6.27,14 -14,14 h-44 c-7.73,0 -14,-6.27 -14,-14 v-40 c0,-7.73 6.27,-14 14,-14 z" />
+
+    <!-- Platinum Light Grey Precision Chamfer Rim -->
+    <path
+        android:strokeColor="#E4E4E7"
+        android:strokeWidth="2.8"
+        android:pathData="M33,23 h42 c6.63,0 12,5.37 12,12 v38 c0,6.63 -5.37,12 -12,12 h-42 c-6.63,0 -12,-5.37 -12,-12 v-38 c0,-6.63 5.37,-12 12,-12 z" />
+
+    <!-- Broadcast Signal Waves in Light Grey -->
+    <path
+        android:strokeColor="#A1A1AA"
         android:strokeWidth="2.5"
-        android:pathData="M54,20 A34,34 0 1,0 54,88 A34,34 0 1,0 54,20" />
-
-    <!-- Broadcast Waves -->
-    <path
-        android:strokeColor="#E4E4E7"
-        android:strokeWidth="3"
         android:strokeLineCap="round"
-        android:pathData="M34,42 C30,48 30,60 34,66" />
+        android:pathData="M27,45 C23,50 23,58 27,63" />
     <path
-        android:strokeColor="#E4E4E7"
-        android:strokeWidth="3"
+        android:strokeColor="#A1A1AA"
+        android:strokeWidth="2.5"
         android:strokeLineCap="round"
-        android:pathData="M74,42 C78,48 78,60 74,66" />
+        android:pathData="M81,45 C85,50 85,58 81,63" />
 
-    <!-- Inner Core Screen Symbol -->
+    <!-- Center Streaming Display Monitor in Light Grey -->
+    <path
+        android:fillColor="#E4E4E7"
+        android:pathData="M38,36 h32 c3.31,0 6,2.69 6,6 v24 c0,3.31 -2.69,6 -6,6 h-32 c-3.31,0 -6,-2.69 -6,-6 v-24 c0,-3.31 2.69,-6 6,-6 z" />
+
+    <!-- Inner Screen Display in Deep Studio Black -->
+    <path
+        android:fillColor="#141416"
+        android:pathData="M41,40 h26 v18 h-26 z" />
+
+    <!-- Center Play/Live Broadcast Arrow in Pure White -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M44,38 h20 c3.31,0 6,2.69 6,6 v16 c0,3.31 -2.69,6 -6,6 h-20 c-3.31,0 -6,-2.69 -6,-6 v-16 c0,-3.31 2.69,-6 6,-6 z" />
+        android:pathData="M51,44 L60,49 L51,54 Z" />
 
-    <!-- Center Play/Live Glyph in Obsidian -->
+    <!-- Minimalist Stand Base -->
     <path
-        android:fillColor="#18181B"
-        android:pathData="M51,48 L60,54 L51,60 Z" />
+        android:fillColor="#71717A"
+        android:pathData="M51,72 h6 v4 h-6 z" />
+    <path
+        android:fillColor="#71717A"
+        android:pathData="M44,76 h20 v2 h-20 z" />
 </vector>

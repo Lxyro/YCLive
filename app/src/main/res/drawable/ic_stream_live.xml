@@ -3,14 +3,35 @@
     android:height="24dp"
     android:viewportWidth="24"
     android:viewportHeight="24">
-    <!-- Refined Minimalist Broadcast Emblem (Apple Monochrome) -->
+    <!-- Studio Square / Squircle Base in Obsidian Black -->
     <path
-        android:fillColor="#18181B"
-        android:pathData="M12,2C6.48,2 2,6.48 2,12s4.48,10 10,10 10,-4.48 10,-10S17.52,2 12,2z" />
+        android:fillColor="#121214"
+        android:pathData="M5,2 h14 c2.21,0 4,1.79 4,4 v12 c0,2.21 -1.79,4 -4,4 h-14 c-2.21,0 -4,-1.79 -4,-4 v-12 c0,-2.21 1.79,-4 4,-4 z" />
+
+    <!-- Platinum Light Grey Frame Rim -->
+    <path
+        android:strokeColor="#E4E4E7"
+        android:strokeWidth="1.2"
+        android:pathData="M5,3.5 h14 c1.38,0 2.5,1.12 2.5,2.5 v12 c0,1.38 -1.12,2.5 -2.5,2.5 h-14 c-1.38,0 -2.5,-1.12 -2.5,-2.5 v-12 c0,-1.38 1.12,-2.5 2.5,-2.5 z" />
+
+    <!-- Stream Center Screen Monitor -->
+    <path
+        android:fillColor="#E4E4E7"
+        android:pathData="M7,7 h10 c0.83,0 1.5,0.67 1.5,1.5 v6 c0,0.83 -0.67,1.5 -1.5,1.5 h-10 c-0.83,0 -1.5,-0.67 -1.5,-1.5 v-6 c0,-0.83 0.67,-1.5 1.5,-1.5 z" />
+
+    <!-- Inner Core Display in Deep Black with Play Glyph -->
+    <path
+        android:fillColor="#121214"
+        android:pathData="M8,8.5 h8 v5 h-8 z" />
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M12,6.5c-3.03,0 -5.5,2.47 -5.5,5.5s2.47,5.5 5.5,5.5 5.5,-2.47 5.5,-5.5 -2.47,-5.5 -5.5,-5.5zm0,9c-1.93,0 -3.5,-1.57 -3.5,-3.5s1.57,-3.5 3.5,-3.5 3.5,1.57 3.5,3.5 -1.57,3.5 -3.5,3.5z" />
+        android:pathData="M11,9.5 L14.5,11 L11,12.5 Z" />
+
+    <!-- Stream Stand Base -->
     <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M12,10a2,2 0 1,0 0,4a2,2 0 1,0 0,-4z" />
+        android:fillColor="#A1A1AA"
+        android:pathData="M10.5,16.5 h3 v1.5 h-3 z" />
+    <path
+        android:fillColor="#A1A1AA"
+        android:pathData="M8.5,18 h7 v1 h-7 z" />
 </vector>

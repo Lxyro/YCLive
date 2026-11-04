@@ -2,18 +2,28 @@ package com.yclive.streamer.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Authentic Apple iOS Liquid Light & Floating Dock Palette (Inspired by Reference)
+// Authentic Apple iOS Liquid Light & Floating Dock Palette
 val CanvasBg = Color(0xFFF5F6F9)
 val CardSurface = Color(0xFFFFFFFF)
 val CardBorder = Color(0xFFE5E7EB)
 val CardBorderHighlight = Color(0x33000000)
 val SoftShadow = Color(0x0F000000)
 
-// Floating Bottom Dock Bar
+// Studio Square & Pro Stream Palette (Light Grey & Obsidian Black)
+val StudioBlack = Color(0xFF121214)
+val StudioDarkGrey = Color(0xFF27272A)
+val StudioLightGrey = Color(0xFFE4E4E7)
+val StudioMutedGrey = Color(0xFFA1A1AA)
+val StudioBorder = Color(0xFFD4D4D8)
+
+// Liquid Glass Floating Bottom Dock Bar
 val DockBg = Color(0xFF161619)
+val LiquidGlassBg = Color(0xCCFFFFFF)
+val LiquidGlassDarkBg = Color(0xCC18181B)
+val LiquidGlassBorder = Color(0x66FFFFFF)
 val DockBorder = Color(0x33FFFFFF)
-val DockPillActive = Color(0xFFFFFFFF)
-val DockIconActive = Color(0xFF161619)
+val DockPillActive = Color(0xFF18181B)
+val DockIconActive = Color(0xFFFFFFFF)
 val DockIconInactive = Color(0xFF8E8E93)
 
 // Filter & Category Segmented Pills
