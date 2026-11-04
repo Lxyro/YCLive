@@ -25,20 +25,16 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
       - name: Setup Gradle 8.7
         uses: gradle/actions/setup-gradle@v3
         with:
           gradle-version: 8.7
-          cache-read-only: false
 
       - name: Ensure Gradle Wrapper Executable and Wrapper Jar
         run: |
           chmod +x gradlew
           if [ ! -f "gradle/wrapper/gradle-wrapper.jar" ]; then
-            echo "Generating Gradle wrapper via installed Gradle 8.7..."
+            echo "Generating Gradle wrapper via Gradle 8.7..."
             gradle wrapper --gradle-version 8.7
           fi
 
