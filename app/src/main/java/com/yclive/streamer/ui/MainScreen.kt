@@ -767,7 +767,7 @@ private fun FloatingAppleDockBar(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 48.dp, bottom = 22.dp),
+            .padding(start = 48.dp, end = 48.dp, bottom = 22.dp),
         contentAlignment = Alignment.Center
     ) {
         Box(
