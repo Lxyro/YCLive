@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">YC Live</string>
+    <string name="notification_channel_name">YC Live Ekran Yayını</string>
+    <string name="notification_channel_desc">Ultra düşük gecikmeli ekran yayını bildirim kanalı</string>
+    <string name="notification_title">YC Live Yayında</string>
+    <string name="notification_text">Ekran yerel ağa yansıtılıyor...</string>
+    <string name="action_stop">DURDUR</string>
+</resources>

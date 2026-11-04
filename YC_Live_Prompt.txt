@@ -1,0 +1,56 @@
+Sen kıdemli bir Android sistem, düşük gecikmeli medya akışı (low-latency streaming) ve DevOps mühendisisin.
+PUBG Mobile gibi yüksek tempolu, HDR ve 60/90 FPS rekabetçi oyunları yerel ağda (LAN/Wi-Fi) donanım hızlandırmalı olarak minimum gecikme (<70ms) ve sıfır kare kaybı (drop/stuttering) ile tarayıcıya yansıtacak bağımsız bir Android uygulaması geliştirmeni ve bu projenin doğrudan kurulabilir hazır bir APK (.apk) dosyasına dönüştürülmesini sağlayacak tam otomatik derleme altyapısını kurmanı istiyorum.
+
+Uygulamanın mimarisi, kodları ve teslimat yapısı şu gereksinimlere tam olarak uymalıdır:
+
+---
+
+### 1. Temel Mimari ve Akış Protokolü
+- **Standart HTTP MJPEG, RTSP veya hantal WebRTC yerine WebSocket üzerinden saf H.264 NAL Unit (Annex-B) iletimi** kurgulanmalıdır.
+- Android içinde gömülü (embedded) hafif bir HTTP + WebSocket sunucusu çalışmalıdır (Ktor CIO motoru ile).
+- İstemci tarayıcıda cihazın IP adresini açtığında (örn: `http://192.168.1.50:8080`), sunucu gömülü HTML5 oynatıcıyı iletecek; oynatıcı anında WebSocket'e bağlanıp gelen H.264 binary frame'lerini donanım hızlandırmalı WebCodecs API (`VideoDecoder`) ile sıfır tamponlama (Buffer = 0) mantığıyla `<canvas>` üzerine çizecektir.
+
+### 2. Video Yakalama ve Donanımsal Kodlama (Hardware Encoding)
+- Ekran yakalama: `MediaProjection` API + `VirtualDisplay`.
+- Kodlama (Encoding): `MediaCodec` (Input Surface modu, sıfır kopyalama / zero-copy).
+- Kodlayıcı Türü: `video/avc` (H.264 Baseline Profile - maksimum tarayıcı uyumluluğu ve sıfır decode gecikmesi için).
+- Parametreler:
+  - Çözünürlük: Dinamik ölçeklenebilir (Varsayılan 1080p / 1920x1080).
+  - Kare Hızı: 60 FPS (90 FPS opsiyonu).
+  - Bitrate: 20 Mbps - 30 Mbps (Yerel Wi-Fi için yüksek görsel sadakat).
+  - Bitrate Modu: `BITRATE_MODE_CBR` (Kare düşmelerini ve bant genişliği dalgalanmalarını önlemek için).
+  - I-Frame Aralığı: `KEY_I_FRAME_INTERVAL = 1` (Hızlı bağlantı toparlanması için 1 saniye).
+  - Gecikme Modu: `KEY_LATENCY = 0` ve `KEY_PRIORITY = 0` (Gerçek zamanlı düşük gecikme).
+
+### 3. Kullanıcı Arayüzü (UI) ve Arka Plan Servisi
+- Modern, koyu temalı (Dark UI) tek ekranlı Jetpack Compose arayüzü:
+  - Durum göstergesi (Yayın Durumu: Beklemede / Canlı).
+  - Tek tıkla başlatma/durdurma butonu.
+  - Yayın başladığında otomatik üretilen ve tek tıkla kopyalanabilen yerel URL (`http://[CİHAZ_IP]:8080`).
+  - Ayar seçenekleri: Çözünürlük (720p, 1080p), FPS (60, 90), Bitrate (15M, 25M, 35M).
+- Oyun oynanırken yayının arka planda kapanmaması için Android 14/15 uyumlu `ForegroundService` (`foregroundServiceType="mediaProjection"`).
+
+### 4. Tarayıcı Oynatıcısı (Client-Side Zero-Latency Player)
+- Ktor sunucusu tarafından string/asset olarak sunulacak harici bağımlılıksız (offline çalışan) tek parça `index.html`:
+  - `WebCodecs` (`VideoDecoder`) API entegrasyonu.
+  - WebSocket üzerinden gelen binary paketlerden SPS (0x67) ve PPS (0x68) NAL unit'lerini otomatik tespit edip dekoderi başlatan `description` ayrıştırıcı.
+  - Sıfır gecikme (Bufferless rendering): Gelen kareyi anında `ImageBitmap` veya `VideoFrame` olarak canvas context'ine transfer eden döngü.
+
+### 5. Otomatik APK Derleme Altyapısı (CI/CD - GitHub Actions)
+- Projeyi yerel bir Android Studio ortamına ihtiyaç duymadan doğrudan GitHub üzerinden derleyip indirilebilir `.apk` verecek `.github/workflows/build-apk.yml` dosyasını eksiksiz hazırla:
+  - Ubuntu son sürüm üzerinde çalışmalı.
+  - JDK 17 ve Android SDK Build-Tools kurulumunu yapmalı.
+  - Gradle Wrapper izinlerini ayarlayıp `./gradlew assembleDebug` (veya `assembleRelease`) çalıştırmalı.
+  - Üretilen `app-debug.apk` dosyasını GitHub Actions **Artifacts** sekmesine yüklenecek şekilde `actions/upload-artifact@v4` ile paketlemeli.
+
+---
+
+### Teslim Edilecek Tam Çıktı Dosyaları:
+1. `settings.gradle.kts` ve `build.gradle.kts` (Project & App seviyesi, Ktor ve Compose bağımlılıklarıyla).
+2. `AndroidManifest.xml` (Gerekli tüm izinler ve servis tanımları).
+3. `LocalStreamServer.kt` (Ktor CIO HTTP & WebSocket motoru).
+4. `ScreenCaptureService.kt` (MediaProjection, VirtualDisplay, MediaCodec kodlayıcı döngüsü).
+5. `WebPlayer.kt` veya `index.html` (WebCodecs tabanlı ultra-düşük gecikmeli oynatıcı kodu).
+6. `MainActivity.kt` (Tek butonlu, modern Compose arayüzü).
+7. `.github/workflows/build-apk.yml` (Otomatik APK derleme dosyası).
+8. **Kullanım Kılavuzu:** Kodları boş bir GitHub reposuna atıp tek tıkla hazır `.apk` dosyasını telefona indirme adımları.
