@@ -196,6 +196,12 @@ class ScreenCaptureService : Service() {
             setInteger(MediaFormat.KEY_FRAME_RATE, config.fps)
             setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 1) // 1 second keyframe interval
 
+            // Repeat previous frame to maintain constant flow if screen doesn't change
+            try {
+                val repeatUs = (1_000_000L / config.fps)
+                setLong(MediaFormat.KEY_REPEAT_PREVIOUS_FRAME_AFTER, repeatUs)
+            } catch (_: Exception) {}
+
             // Constant Bitrate for smooth network stream
             setInteger(MediaFormat.KEY_BITRATE_MODE, MediaCodecInfo.EncoderCapabilities.BITRATE_MODE_CBR)
 

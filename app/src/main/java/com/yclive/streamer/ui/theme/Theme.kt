@@ -4,24 +4,24 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 
-private val DarkColorScheme = darkColorScheme(
-    primary = CyanAccent,
-    secondary = GreenAccent,
-    tertiary = YellowAccent,
-    background = BgDark,
-    surface = SurfaceDark,
-    surfaceVariant = CardDark,
-    error = RedAccent,
-    onPrimary = BgDark,
-    onSecondary = BgDark,
-    onBackground = TextPrimary,
-    onSurface = TextPrimary
+private val MidnightColorScheme = darkColorScheme(
+    primary = NeonCyan,
+    secondary = NeonEmerald,
+    tertiary = ElectricViolet,
+    background = MidnightDeep,
+    surface = MidnightSurface,
+    surfaceVariant = GlassCard,
+    error = CrimsonRed,
+    onPrimary = MidnightDeep,
+    onSecondary = MidnightDeep,
+    onBackground = TextPure,
+    onSurface = TextPure
 )
 
 @Composable
 fun YCLiveTheme(content: @Composable () -> Unit) {
     MaterialTheme(
-        colorScheme = DarkColorScheme,
+        colorScheme = MidnightColorScheme,
         typography = Typography,
         content = content
     )

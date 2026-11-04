@@ -1,9 +1,56 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
+
+    <!-- Outer Hexagonal / Shield Brand Crest -->
     <path
-        android:fillColor="#00F0FF"
-        android:pathData="M54,20 C35.2,20 20,35.2 20,54 C20,72.8 35.2,88 54,88 C72.8,88 88,72.8 88,54 C88,35.2 72.8,20 54,20 Z M46,38 L68,54 L46,70 Z" />
+        android:pathData="M54,16 L88,32 L88,72 L54,92 L20,72 L20,32 Z"
+        android:strokeWidth="3"
+        android:strokeLineJoin="round"
+        android:strokeLineCap="round">
+        <aapt:attr name="android:strokeColor">
+            <gradient
+                android:startX="20"
+                android:startY="16"
+                android:endX="88"
+                android:endY="92"
+                android:type="linear">
+                <item android:color="#00F0FF" android:offset="0.0" />
+                <item android:color="#8B5CF6" android:offset="0.5" />
+                <item android:color="#00E676" android:offset="1.0" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Inner Glow Ring -->
+    <path
+        android:pathData="M54,26 L80,39 L80,69 L54,82 L28,69 L28,39 Z"
+        android:fillColor="#151A2C" />
+
+    <!-- Stylized Modern 'Y' & Broadcast Wave -->
+    <path
+        android:pathData="M38,40 L54,58 L70,40 M54,58 L54,74"
+        android:strokeWidth="5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round">
+        <aapt:attr name="android:strokeColor">
+            <gradient
+                android:startX="38"
+                android:startY="40"
+                android:endX="70"
+                android:endY="74"
+                android:type="linear">
+                <item android:color="#00F0FF" android:offset="0.0" />
+                <item android:color="#38BDF8" android:offset="1.0" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Center Live Broadcast Beacon Point -->
+    <path
+        android:pathData="M54,55 m-3,0 a3,3 0 1,0 6,0 a3,3 0 1,0 -6,0"
+        android:fillColor="#00E676" />
 </vector>
