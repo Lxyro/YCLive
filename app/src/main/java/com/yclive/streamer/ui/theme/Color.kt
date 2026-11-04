@@ -25,3 +25,7 @@ val AmberGlow = Color(0xFFFBBF24)
 val TextPure = Color(0xFFFFFFFF)
 val TextMuted = Color(0xFF94A3B8)
 val TextDim = Color(0xFF64748B)
+
+// Compatibility aliases
+val TextPrimary = TextPure
+val TextSecondary = TextMuted

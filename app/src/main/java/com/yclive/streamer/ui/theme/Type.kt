@@ -13,7 +13,7 @@ val Typography = Typography(
         fontSize = 28.sp,
         lineHeight = 34.sp,
         letterSpacing = 0.sp,
-        color = TextPrimary
+        color = TextPure
     ),
     headlineMedium = TextStyle(
         fontFamily = FontFamily.SansSerif,
@@ -21,7 +21,7 @@ val Typography = Typography(
         fontSize = 20.sp,
         lineHeight = 26.sp,
         letterSpacing = 0.sp,
-        color = TextPrimary
+        color = TextPure
     ),
     titleMedium = TextStyle(
         fontFamily = FontFamily.SansSerif,
@@ -29,7 +29,7 @@ val Typography = Typography(
         fontSize = 16.sp,
         lineHeight = 22.sp,
         letterSpacing = 0.15.sp,
-        color = TextPrimary
+        color = TextPure
     ),
     bodyLarge = TextStyle(
         fontFamily = FontFamily.SansSerif,
@@ -37,7 +37,7 @@ val Typography = Typography(
         fontSize = 15.sp,
         lineHeight = 22.sp,
         letterSpacing = 0.5.sp,
-        color = TextSecondary
+        color = TextMuted
     ),
     bodyMedium = TextStyle(
         fontFamily = FontFamily.SansSerif,
@@ -45,7 +45,7 @@ val Typography = Typography(
         fontSize = 13.sp,
         lineHeight = 18.sp,
         letterSpacing = 0.25.sp,
-        color = TextSecondary
+        color = TextMuted
     ),
     labelLarge = TextStyle(
         fontFamily = FontFamily.SansSerif,
@@ -53,6 +53,6 @@ val Typography = Typography(
         fontSize = 14.sp,
         lineHeight = 20.sp,
         letterSpacing = 0.5.sp,
-        color = TextPrimary
+        color = TextPure
     )
 )
