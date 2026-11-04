@@ -59,9 +59,7 @@ class LocalStreamServer(
         try {
             engine = embeddedServer(CIO, host = "0.0.0.0", port = port) {
                 install(WebSockets) {
-                    pingPeriod = java.time.Duration.ofSeconds(15)
-                    timeout = java.time.Duration.ofSeconds(15)
-                    maxFrameSize = 10 * 1024 * 1024 // 10MB
+                    maxFrameSize = 10 * 1024 * 1024L // 10MB
                     masking = false
                 }
 
