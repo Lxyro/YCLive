@@ -261,6 +261,22 @@ class ScreenCaptureService : Service() {
                         outputBufferIndex == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED -> {
                             val newFormat = encoder.outputFormat
                             Log.i(tag, "MediaCodec format değişti: $newFormat")
+                            try {
+                                val csd0 = newFormat.getByteBuffer("csd-0")
+                                val csd1 = newFormat.getByteBuffer("csd-1")
+                                if (csd0 != null && csd1 != null) {
+                                    val sps = ByteArray(csd0.remaining()).also { csd0.get(it) }
+                                    val pps = ByteArray(csd1.remaining()).also { csd1.get(it) }
+                                    val combined = ByteArray(sps.size + pps.size)
+                                    System.arraycopy(sps, 0, combined, 0, sps.size)
+                                    System.arraycopy(pps, 0, combined, sps.size, pps.size)
+                                    localStreamServer?.cachedConfigBuffer = combined
+                                    localStreamServer?.broadcastFrame(combined)
+                                    Log.i(tag, "csd-0 ve csd-1 formatından SPS/PPS önbelleklendi (${combined.size} bayt)")
+                                }
+                            } catch (e: Exception) {
+                                Log.w(tag, "csd çıkarılamadı: ${e.message}")
+                            }
                         }
                         outputBufferIndex >= 0 -> {
                             val outputBuffer = encoder.getOutputBuffer(outputBufferIndex)

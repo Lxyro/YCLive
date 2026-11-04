@@ -2,30 +2,38 @@ package com.yclive.streamer.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Midnight Deep Space Palette
-val MidnightDeep = Color(0xFF04060C)
-val MidnightDark = Color(0xFF080C16)
-val MidnightSurface = Color(0xFF0E1424)
+// Pure OLED Black & Monochrome Palette
+val ObsidianBlack = Color(0xFF000000)
+val CharcoalDark = Color(0xFF0A0A0C)
+val SurfaceDark = Color(0xFF121216)
 
-// iOS Liquid Glass Colors
-val GlassCard = Color(0x66161F36)        // 40% translucent frosted glass
-val GlassCardHover = Color(0x8C1E294B)   // 55% translucent
-val GlassBorder = Color(0x2E60A5FA)      // Subtle electric blue glass edge
-val GlassBorderBright = Color(0x5900F0FF)// Glowing edge
-val GlassPill = Color(0x401E293B)
+// Monochrome Apple-style Liquid Glass
+val GlassCard = Color(0x12FFFFFF)        // 7% translucent frosted glass
+val GlassCardSelected = Color(0x24FFFFFF)// 14% translucent
+val GlassBorder = Color(0x26FFFFFF)      // 15% delicate white rim
+val GlassBorderBright = Color(0x59FFFFFF)// 35% highlighted glass edge
+val GlassPill = Color(0x1AFFFFFF)        // 10% translucent pill
+val GlassPillActive = Color(0x33FFFFFF)  // 20% active pill
 
-// Brand Neon Accents
-val NeonCyan = Color(0xFF00F0FF)
-val ElectricViolet = Color(0xFF8B5CF6)
-val NeonEmerald = Color(0xFF00E676)
-val CrimsonRed = Color(0xFFFF3366)
-val AmberGlow = Color(0xFFFBBF24)
+// Clean Accent Colors
+val PureWhite = Color(0xFFFFFFFF)
+val MutedSlate = Color(0xFFA1A1AA)
+val DimGrey = Color(0xFF71717A)
+val LiveGreen = Color(0xFF10B981)
+val AlertRed = Color(0xFFEF4444)
 
-// Text Colors
-val TextPure = Color(0xFFFFFFFF)
-val TextMuted = Color(0xFF94A3B8)
-val TextDim = Color(0xFF64748B)
+// Standard Compatibility Aliases
+val TextPure = PureWhite
+val TextMuted = MutedSlate
+val TextDim = DimGrey
+val TextPrimary = PureWhite
+val TextSecondary = MutedSlate
 
-// Compatibility aliases
-val TextPrimary = TextPure
-val TextSecondary = TextMuted
+val NeonCyan = PureWhite
+val NeonEmerald = LiveGreen
+val ElectricViolet = PureWhite
+val CrimsonRed = AlertRed
+val AmberGlow = PureWhite
+val MidnightDeep = ObsidianBlack
+val MidnightDark = CharcoalDark
+val MidnightSurface = SurfaceDark

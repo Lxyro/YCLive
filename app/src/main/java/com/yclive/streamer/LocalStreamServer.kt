@@ -101,6 +101,10 @@ class LocalStreamServer(
 
                             // Request an immediate IDR Keyframe from hardware encoder
                             onRequestSyncFrame?.invoke()
+                            serverScope.launch {
+                                kotlinx.coroutines.delay(120)
+                                onRequestSyncFrame?.invoke()
+                            }
 
                             // Keep WebSocket open while listening for incoming messages or close signals
                             for (frame in incoming) {

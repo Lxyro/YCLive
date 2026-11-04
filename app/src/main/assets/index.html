@@ -3,18 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>YC LIVE - Midnight Ultra-Low Latency Stream</title>
+  <title>YC Live - Monochrome Liquid Glass Mirror</title>
   <style>
     :root {
-      --bg-midnight: #04060C;
-      --glass-surface: rgba(14, 20, 36, 0.65);
-      --glass-border: rgba(96, 165, 250, 0.22);
-      --glass-border-glow: rgba(0, 240, 255, 0.45);
-      --neon-cyan: #00F0FF;
-      --neon-emerald: #00E676;
-      --neon-purple: #8B5CF6;
-      --text-white: #FFFFFF;
-      --text-muted: #94A3B8;
+      --bg-black: #000000;
+      --glass-surface: rgba(255, 255, 255, 0.07);
+      --glass-surface-hover: rgba(255, 255, 255, 0.12);
+      --glass-border: rgba(255, 255, 255, 0.15);
+      --glass-border-highlight: rgba(255, 255, 255, 0.3);
+      --text-pure: #FFFFFF;
+      --text-muted: #A1A1AA;
+      --text-dim: #71717A;
+      --live-green: #10B981;
     }
     * {
       box-sizing: border-box;
@@ -25,9 +25,9 @@
     html, body {
       width: 100%;
       height: 100%;
-      background-color: var(--bg-midnight);
-      color: var(--text-white);
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, sans-serif;
+      background-color: var(--bg-black);
+      color: var(--text-pure);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif;
       overflow: hidden;
     }
     #viewport-container {
@@ -37,86 +37,83 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: radial-gradient(circle at center, #0B1120 0%, #030509 100%);
+      background: #000000;
     }
-    canvas, video {
+    video, canvas {
       width: 100%;
       height: 100%;
       object-fit: contain;
       display: block;
-      transition: object-fit 0.2s ease;
-    }
-    video {
-      background: transparent;
       outline: none;
+      background: transparent;
     }
 
-    /* iOS Liquid Glass HUD Overlay */
+    /* Minimalist Apple Liquid Glass HUD */
     .hud-overlay {
       position: absolute;
-      top: 18px;
-      left: 18px;
-      right: 18px;
+      top: 20px;
+      left: 20px;
+      right: 20px;
       display: flex;
       justify-content: space-between;
-      align-items: flex-start;
+      align-items: center;
       pointer-events: none;
-      transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
       z-index: 20;
     }
     .hud-overlay.hidden {
       opacity: 0;
-      transform: translateY(-10px);
+      transform: translateY(-8px);
     }
     .glass-group {
       display: flex;
       gap: 10px;
       flex-wrap: wrap;
+      align-items: center;
     }
     .glass-pill {
       background: var(--glass-surface);
       border: 1px solid var(--glass-border);
-      backdrop-filter: blur(20px) saturate(180%);
-      -webkit-backdrop-filter: blur(20px) saturate(180%);
-      padding: 8px 14px;
-      border-radius: 14px;
+      backdrop-filter: blur(28px) saturate(180%);
+      -webkit-backdrop-filter: blur(28px) saturate(180%);
+      padding: 8px 16px;
+      border-radius: 9999px;
       font-size: 13px;
-      font-weight: 600;
-      letter-spacing: 0.3px;
+      font-weight: 500;
+      letter-spacing: -0.2px;
       display: flex;
       align-items: center;
       gap: 8px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.15);
     }
     .brand-title {
-      font-weight: 800;
-      letter-spacing: 1.2px;
-      background: linear-gradient(135deg, #00F0FF 0%, #8B5CF6 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: #FFFFFF;
     }
     .status-dot {
-      width: 8px;
-      height: 8px;
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
       background-color: #EF4444;
-      box-shadow: 0 0 10px #EF4444;
       transition: all 0.3s ease;
     }
     .status-dot.live {
-      background-color: var(--neon-emerald);
-      box-shadow: 0 0 12px var(--neon-emerald);
+      background-color: var(--live-green);
+      box-shadow: 0 0 10px var(--live-green);
       animation: pulse 1.8s infinite;
     }
     @keyframes pulse {
       0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.5; transform: scale(1.2); }
+      50% { opacity: 0.4; transform: scale(1.15); }
     }
-    .accent-cyan { color: var(--neon-cyan); }
-    .accent-green { color: var(--neon-emerald); }
-    .accent-purple { color: var(--neon-purple); }
+    .val-highlight {
+      font-weight: 600;
+      color: #FFFFFF;
+      font-variant-numeric: tabular-nums;
+    }
 
-    /* Action Controls */
+    /* Monochrome Action Controls */
     .controls-group {
       display: flex;
       gap: 10px;
@@ -125,61 +122,68 @@
     .glass-btn {
       background: var(--glass-surface);
       border: 1px solid var(--glass-border);
-      color: var(--text-white);
-      padding: 8px 16px;
-      border-radius: 12px;
+      color: #FFFFFF;
+      padding: 8px 18px;
+      border-radius: 9999px;
       font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 0.4px;
+      font-weight: 600;
+      letter-spacing: -0.1px;
       cursor: pointer;
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15);
       transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .glass-btn:hover {
-      background: rgba(0, 240, 255, 0.18);
-      border-color: var(--neon-cyan);
+      background: var(--glass-surface-hover);
+      border-color: var(--glass-border-highlight);
       transform: translateY(-1px);
     }
+    .glass-btn:active {
+      transform: translateY(0);
+      background: rgba(255, 255, 255, 0.18);
+    }
 
-    /* Center Liquid Glass Card */
+    /* Center Toast Message */
     #center-message {
       position: absolute;
       text-align: center;
       pointer-events: none;
       z-index: 10;
-      background: rgba(10, 15, 28, 0.75);
-      backdrop-filter: blur(30px) saturate(180%);
-      -webkit-backdrop-filter: blur(30px) saturate(180%);
-      padding: 32px 48px;
-      border-radius: 24px;
+      background: rgba(18, 18, 20, 0.8);
+      backdrop-filter: blur(35px) saturate(190%);
+      -webkit-backdrop-filter: blur(35px) saturate(190%);
+      padding: 34px 48px;
+      border-radius: 28px;
       border: 1px solid var(--glass-border);
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.15);
-      transition: opacity 0.3s ease;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+      transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    #center-message.fade-out {
+      opacity: 0;
+      transform: scale(0.96);
+      pointer-events: none;
     }
     #center-message h2 {
-      font-size: 22px;
-      font-weight: 800;
-      letter-spacing: 0.5px;
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.4px;
       margin-bottom: 8px;
-      background: linear-gradient(135deg, #00F0FF, #38BDF8);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      color: #FFFFFF;
     }
     #center-message p {
-      font-size: 14px;
+      font-size: 13px;
       color: var(--text-muted);
       line-height: 1.5;
     }
     .spinner {
       margin: 20px auto 0;
-      width: 34px;
-      height: 34px;
-      border: 3px solid rgba(0, 240, 255, 0.15);
-      border-top-color: var(--neon-cyan);
+      width: 32px;
+      height: 32px;
+      border: 2px solid rgba(255, 255, 255, 0.12);
+      border-top-color: #FFFFFF;
       border-radius: 50%;
-      animation: spin 0.8s linear infinite;
+      animation: spin 0.75s linear infinite;
     }
     @keyframes spin {
       to { transform: rotate(360deg); }
@@ -198,20 +202,20 @@
           <span id="status-text">BAĞLANILIYOR...</span>
         </div>
         <div class="glass-pill">
-          <span>FPS:</span>
-          <span class="accent-cyan" id="fps-val">--</span>
+          <span style="color:var(--text-dim)">FPS:</span>
+          <span class="val-highlight" id="fps-val">--</span>
         </div>
         <div class="glass-pill">
-          <span>BİTRATE:</span>
-          <span class="accent-green" id="bitrate-val">-- Mbps</span>
+          <span style="color:var(--text-dim)">BİTRATE:</span>
+          <span class="val-highlight" id="bitrate-val">-- Mbps</span>
         </div>
         <div class="glass-pill">
-          <span>ÇÖZÜNÜRLÜK:</span>
-          <span id="res-val">-- x --</span>
+          <span style="color:var(--text-dim)">ÇÖZÜNÜRLÜK:</span>
+          <span class="val-highlight" id="res-val">-- x --</span>
         </div>
         <div class="glass-pill">
-          <span>MOTOR:</span>
-          <span class="accent-purple" id="engine-val">OTOMATİK</span>
+          <span style="color:var(--text-dim)">GECİKME:</span>
+          <span class="val-highlight" id="mode-val">SIFIR GECİKME</span>
         </div>
       </div>
       <div class="controls-group">
@@ -226,24 +230,20 @@
       <div class="spinner" id="spinner"></div>
     </div>
 
-    <!-- Video Element for MSE Engine -->
-    <video id="mse-video" playsinline autoplay muted style="display: none;"></video>
-    <!-- Canvas Element for WebCodecs Engine -->
-    <canvas id="webcodecs-canvas" style="display: none;"></canvas>
+    <!-- Video Element for Zero-Latency Playback -->
+    <video id="video-player" playsinline autoplay muted></video>
   </div>
 
   <script>
     (function () {
       'use strict';
 
-      const canvas = document.getElementById('webcodecs-canvas');
-      const video = document.getElementById('mse-video');
+      const video = document.getElementById('video-player');
       const statusDot = document.getElementById('status-dot');
       const statusText = document.getElementById('status-text');
       const fpsVal = document.getElementById('fps-val');
       const bitrateVal = document.getElementById('bitrate-val');
       const resVal = document.getElementById('res-val');
-      const engineVal = document.getElementById('engine-val');
       const centerMsg = document.getElementById('center-message');
       const hud = document.getElementById('hud');
       const btnFullscreen = document.getElementById('btn-fullscreen');
@@ -257,154 +257,16 @@
       let lastFpsTime = performance.now();
       let fitMode = 'contain';
       let isHudVisible = true;
-
-      // Detection: Determine best supported engine
-      const hasWebCodecs = ('VideoDecoder' in window);
-      const hasMSE = ('MediaSource' in window) && MediaSource.isTypeSupported('video/mp4; codecs="avc1.42002a"');
-
-      let activeEngine = hasWebCodecs ? 'webcodecs' : 'mse';
-      console.log(`YC Live Aktif Motor: ${activeEngine} (WebCodecs: ${hasWebCodecs}, MSE: ${hasMSE})`);
+      let isStreamLive = false;
 
       // -------------------------------------------------------------
-      // ENGINE 1: WebCodecs (Pure zero-latency bufferless canvas)
+      // ISO-BMFF (fMP4) Box Construction Utilities
       // -------------------------------------------------------------
-      let decoder = null;
-      let decoderConfigured = false;
-      const ctx = canvas.getContext('2d', { alpha: false, desynchronized: true });
-
-      function initWebCodecs() {
-        canvas.style.display = 'block';
-        video.style.display = 'none';
-        engineVal.innerText = 'WEBCODECS (0ms)';
-
-        decoder = new VideoDecoder({
-          output: (videoFrame) => {
-            if (canvas.width !== videoFrame.displayWidth || canvas.height !== videoFrame.displayHeight) {
-              canvas.width = videoFrame.displayWidth;
-              canvas.height = videoFrame.displayHeight;
-              resVal.innerText = `${videoFrame.displayWidth}x${videoFrame.displayHeight}`;
-            }
-            ctx.drawImage(videoFrame, 0, 0, canvas.width, canvas.height);
-            videoFrame.close();
-
-            onFrameDecoded();
-          },
-          error: (err) => {
-            console.warn('WebCodecs hatası, MSE motoruna geçiliyor:', err);
-            switchToMseEngine();
-          }
-        });
-      }
-
-      function buildAvcC(spsData, ppsData) {
-        const totalLen = 7 + spsData.length + 1 + 2 + ppsData.length;
-        const avcC = new Uint8Array(totalLen);
-        let offset = 0;
-
-        avcC[offset++] = 0x01;
-        avcC[offset++] = spsData[1];
-        avcC[offset++] = spsData[2];
-        avcC[offset++] = spsData[3];
-        avcC[offset++] = 0xFF;
-        avcC[offset++] = 0xE1;
-        avcC[offset++] = (spsData.length >> 8) & 0xFF;
-        avcC[offset++] = spsData.length & 0xFF;
-        avcC.set(spsData, offset);
-        offset += spsData.length;
-
-        avcC[offset++] = 0x01;
-        avcC[offset++] = (ppsData.length >> 8) & 0xFF;
-        avcC[offset++] = ppsData.length & 0xFF;
-        avcC.set(ppsData, offset);
-        return avcC;
-      }
-
-      function configureWebCodecs() {
-        if (!sps || !pps || decoderConfigured) return;
-        const profile = sps[1].toString(16).padStart(2, '0');
-        const compat = sps[2].toString(16).padStart(2, '0');
-        const level = sps[3].toString(16).padStart(2, '0');
-        const codecString = `avc1.${profile}${compat}${level}`;
-
-        try {
-          decoder.configure({
-            codec: codecString,
-            description: buildAvcC(sps, pps),
-            optimizeForLatency: true
-          });
-          decoderConfigured = true;
-          console.log(`WebCodecs hazır: ${codecString}`);
-        } catch (e) {
-          console.warn('WebCodecs yapılandırılamadı:', e);
-          switchToMseEngine();
-        }
-      }
-
-      // -------------------------------------------------------------
-      // ENGINE 2: Ultra-Low Latency MSE (Fragmented MP4 Pipeline)
-      // -------------------------------------------------------------
-      let mediaSource = null;
-      let sourceBuffer = null;
-      let mseInitSent = false;
-      let mseQueue = [];
-      let sequenceNumber = 1;
-      let baseDecodeTime = 0;
-
-      function switchToMseEngine() {
-        if (activeEngine === 'mse') return;
-        activeEngine = 'mse';
-        canvas.style.display = 'none';
-        video.style.display = 'block';
-        engineVal.innerText = 'MSE (DÜŞÜK GECİKME)';
-        initMse();
-      }
-
-      function initMse() {
-        canvas.style.display = 'none';
-        video.style.display = 'block';
-        engineVal.innerText = 'MSE (DÜŞÜK GECİKME)';
-
-        mediaSource = new MediaSource();
-        video.src = URL.createObjectURL(mediaSource);
-
-        mediaSource.addEventListener('sourceopen', () => {
-          try {
-            sourceBuffer = mediaSource.addSourceBuffer('video/mp4; codecs="avc1.42002a"');
-            sourceBuffer.mode = 'segments';
-
-            sourceBuffer.addEventListener('updateend', () => {
-              // Flush queued chunks
-              if (mseQueue.length > 0 && !sourceBuffer.updating) {
-                const nextChunk = mseQueue.shift();
-                sourceBuffer.appendBuffer(nextChunk);
-              }
-
-              // Ultra-low latency buffer synchronization (<80ms sync)
-              if (video.buffered.length > 0) {
-                const end = video.buffered.end(video.buffered.length - 1);
-                const diff = end - video.currentTime;
-                if (diff > 0.15) {
-                  video.currentTime = end - 0.02; // Chasing live edge
-                }
-              }
-            });
-
-            if (sps && pps && !mseInitSent) {
-              sendMseInitSegment();
-            }
-          } catch (e) {
-            console.error('SourceBuffer oluşturulamadı:', e);
-          }
-        });
-
-        video.addEventListener('loadedmetadata', () => {
-          video.play().catch(() => {});
-          resVal.innerText = `${video.videoWidth}x${video.videoHeight}`;
-        });
-      }
-
       function u32(val) {
         return new Uint8Array([(val >> 24) & 0xFF, (val >> 16) & 0xFF, (val >> 8) & 0xFF, val & 0xFF]);
+      }
+      function u16(val) {
+        return new Uint8Array([(val >> 8) & 0xFF, val & 0xFF]);
       }
       function str(s) {
         const a = new Uint8Array(s.length);
@@ -425,46 +287,204 @@
         return b;
       }
 
-      function sendMseInitSegment() {
-        if (!sourceBuffer || sourceBuffer.updating || mseInitSent) return;
+      function buildAvcC(spsData, ppsData) {
+        const totalLen = 7 + spsData.length + 1 + 2 + ppsData.length;
+        const avcC = new Uint8Array(totalLen);
+        let off = 0;
+        avcC[off++] = 0x01; // configurationVersion
+        avcC[off++] = spsData[1]; // profile
+        avcC[off++] = spsData[2]; // compatibility
+        avcC[off++] = spsData[3]; // level
+        avcC[off++] = 0xFF; // lengthSizeMinusOne | reserved
+        avcC[off++] = 0xE1; // numOfSPS | reserved (1 SPS)
+        avcC[off++] = (spsData.length >> 8) & 0xFF;
+        avcC[off++] = spsData.length & 0xFF;
+        avcC.set(spsData, off);
+        off += spsData.length;
+        avcC[off++] = 0x01; // numOfPPS
+        avcC[off++] = (ppsData.length >> 8) & 0xFF;
+        avcC[off++] = ppsData.length & 0xFF;
+        avcC.set(ppsData, off);
+        return avcC;
+      }
 
+      // Generate 100% compliant ISO/IEC 14496-12 fMP4 initialization segment (ftyp + moov)
+      function generateInitSegment(spsData, ppsData) {
         const ftyp = box('ftyp', str('isom'), u32(0x200), str('isom'), str('iso2'), str('avc1'), str('mp41'));
-        const avcC = buildAvcC(sps, pps);
 
-        // Simple valid video track moov
-        const mvhd = box('mvhd', new Uint8Array(96)); // generic empty mvhd
-        const tkhd = box('tkhd', new Uint8Array(84));
-        const mdhd = box('mdhd', new Uint8Array(24));
-        const hdlr = box('hdlr', new Uint8Array(4), str('mhlr'), str('vide'), new Uint8Array(12));
+        // mvhd (timescale = 1000)
+        const mvhd = box('mvhd',
+          new Uint8Array(8), // version(1) + flags(3) + creation(4)
+          new Uint8Array(4), // mod_time
+          u32(1000),         // timescale
+          new Uint8Array(4), // duration = 0
+          u32(0x00010000),   // rate = 1.0
+          u16(0x0100),       // volume = 1.0
+          new Uint8Array(10),// reserved
+          // 36 bytes identity matrix
+          u32(0x00010000), u32(0), u32(0),
+          u32(0), u32(0x00010000), u32(0),
+          u32(0), u32(0), u32(0x40000000),
+          new Uint8Array(24),// pre_defined
+          u32(2)             // next_track_id
+        );
+
+        // tkhd (trackId = 1, enabled, inMovie)
+        const tkhd = box('tkhd',
+          new Uint8Array([0, 0, 0, 1]), // version + flags (enabled)
+          new Uint8Array(4),            // creation_time
+          new Uint8Array(4),            // mod_time
+          u32(1),                       // track_id = 1
+          new Uint8Array(4),            // reserved
+          new Uint8Array(4),            // duration = 0
+          new Uint8Array(8),            // reserved
+          new Uint8Array(2),            // layer = 0
+          new Uint8Array(2),            // alternate_group = 0
+          new Uint8Array(2),            // volume = 0
+          new Uint8Array(2),            // reserved
+          // 36 bytes identity matrix
+          u32(0x00010000), u32(0), u32(0),
+          u32(0), u32(0x00010000), u32(0),
+          u32(0), u32(0), u32(0x40000000),
+          u32(1920 << 16),              // default width
+          u32(1080 << 16)               // default height
+        );
+
+        // mdhd (timescale = 1000)
+        const mdhd = box('mdhd',
+          new Uint8Array(12), // version(1)+flags(3)+creation(4)+mod_time(4)
+          u32(1000),          // timescale = 1000
+          new Uint8Array(4),  // duration = 0
+          u16(0x55C4),        // language = 'und'
+          new Uint8Array(2)   // pre_defined
+        );
+
+        // hdlr (vide)
+        const hdlr = box('hdlr',
+          new Uint8Array(4),  // version + flags
+          new Uint8Array(4),  // pre_defined
+          str('vide'),        // handler_type
+          new Uint8Array(12), // reserved
+          str('VideoHandler\0')
+        );
+
+        // vmhd
         const vmhd = box('vmhd', new Uint8Array([0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0]));
+
+        // dinf -> dref -> url
         const dinf = box('dinf', box('dref', new Uint8Array([0, 0, 0, 0, 0, 0, 0, 1]), box('url ', new Uint8Array([0, 0, 0, 1]))));
 
-        const avc1 = box('avc1', new Uint8Array(78), avcC);
-        const stsd = box('stsd', new Uint8Array([0, 0, 0, 0, 0, 0, 0, 1]), avc1);
+        // avcC
+        const avcC = buildAvcC(spsData, ppsData);
+
+        // avc1 (VisualSampleEntry)
+        const avc1Header = new Uint8Array([
+          0, 0, 0, 0, 0, 0,  // reserved (6)
+          0, 1,              // data_reference_index = 1
+          0, 0,              // pre_defined (2)
+          0, 0,              // reserved (2)
+          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // pre_defined (12)
+          (1920 >> 8) & 0xFF, 1920 & 0xFF,    // width
+          (1080 >> 8) & 0xFF, 1080 & 0xFF,    // height
+          0x00, 0x48, 0x00, 0x00,             // horizresolution = 72 dpi
+          0x00, 0x48, 0x00, 0x00,             // vertresolution = 72 dpi
+          0, 0, 0, 0,                         // reserved
+          0, 1,                               // frame_count = 1
+          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // compressorname (32 bytes)
+          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+          0, 0, 0, 0, 0, 0, 0, 0,
+          0, 24,                              // depth = 24
+          0xFF, 0xFF                          // pre_defined = -1
+        ]);
+        const avc1 = box('avc1', avc1Header, avcC);
+
+        // stbl
+        const stsd = box('stsd', new Uint8Array(4), u32(1), avc1);
         const stts = box('stts', new Uint8Array(8));
         const stsc = box('stsc', new Uint8Array(8));
         const stsz = box('stsz', new Uint8Array(12));
         const stco = box('stco', new Uint8Array(8));
         const stbl = box('stbl', stsd, stts, stsc, stsz, stco);
 
+        // minf -> mdia -> trak
         const minf = box('minf', vmhd, dinf, stbl);
         const mdia = box('mdia', mdhd, hdlr, minf);
         const trak = box('trak', tkhd, mdia);
-        const trex = box('trex', new Uint8Array([0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]));
+
+        // mvex -> trex
+        const trex = box('trex', new Uint8Array(4), u32(1), u32(1), new Uint8Array(12));
         const mvex = box('mvex', trex);
+
         const moov = box('moov', mvhd, trak, mvex);
 
         const init = new Uint8Array(ftyp.length + moov.length);
         init.set(ftyp, 0);
         init.set(moov, ftyp.length);
-
-        sourceBuffer.appendBuffer(init);
-        mseInitSent = true;
-        console.log('MSE Başlatma Segmenti gönderildi.');
+        return init;
       }
 
-      function appendMseFrame(slices, isKey) {
-        if (!sourceBuffer || !mseInitSent) return;
+      // -------------------------------------------------------------
+      // MediaSource Engine Management
+      // -------------------------------------------------------------
+      let mediaSource = null;
+      let sourceBuffer = null;
+      let isInitSent = false;
+      let bufferQueue = [];
+      let sequenceNumber = 1;
+      let decodeTime = 0;
+
+      function initMediaSource() {
+        if (!window.MediaSource) {
+          console.error('MediaSource bu tarayıcıda desteklenmiyor.');
+          return;
+        }
+
+        mediaSource = new MediaSource();
+        video.src = URL.createObjectURL(mediaSource);
+
+        mediaSource.addEventListener('sourceopen', () => {
+          try {
+            sourceBuffer = mediaSource.addSourceBuffer('video/mp4; codecs="avc1.42002a"');
+            sourceBuffer.mode = 'sequence';
+
+            sourceBuffer.addEventListener('updateend', () => {
+              if (bufferQueue.length > 0 && !sourceBuffer.updating) {
+                const nextChunk = bufferQueue.shift();
+                sourceBuffer.appendBuffer(nextChunk);
+              }
+
+              // Zero-latency live edge chase (<60ms sync)
+              if (video.buffered.length > 0) {
+                const end = video.buffered.end(video.buffered.length - 1);
+                if (end - video.currentTime > 0.08) {
+                  video.currentTime = end - 0.01;
+                }
+              }
+            });
+
+            if (sps && pps && !isInitSent) {
+              const init = generateInitSegment(sps, pps);
+              sourceBuffer.appendBuffer(init);
+              isInitSent = true;
+              console.log('Valid ISO-BMFF Init segment appended.');
+            }
+          } catch (e) {
+            console.error('AddSourceBuffer hatası:', e);
+          }
+        });
+
+        video.addEventListener('loadedmetadata', () => {
+          video.play().catch(() => {});
+          resVal.innerText = `${video.videoWidth}x${video.videoHeight}`;
+        });
+
+        video.addEventListener('playing', () => {
+          onStreamLive();
+        });
+      }
+
+      function appendFrame(slices, isKey) {
+        if (!sourceBuffer || !isInitSent) return;
 
         let dataLen = 0;
         for (const s of slices) dataLen += 4 + s.length;
@@ -473,7 +493,7 @@
         let off = 0;
         const dv = new DataView(mdatPayload.buffer);
         for (const s of slices) {
-          dv.setUint32(off, s.length, false);
+          dv.setUint32(off, s.length, false); // 4-byte NAL length
           off += 4;
           mdatPayload.set(s, off);
           off += s.length;
@@ -483,36 +503,48 @@
 
         // moof header
         const mfhd = box('mfhd', new Uint8Array(4), u32(sequenceNumber++));
-        const tfhd = box('tfhd', new Uint8Array([0, 0, 0x02, 0, 0, 0, 0, 1])); // default sample duration
-        const tfdt = box('tfdt', new Uint8Array([1, 0, 0, 0]), u32(0), u32(baseDecodeTime));
-        baseDecodeTime += 1500; // ~60fps on 90k timescale
+        const tfhd = box('tfhd', new Uint8Array([0, 0x02, 0, 0]), u32(1)); // default-base-is-moof
+        const tfdt = box('tfdt', new Uint8Array([1, 0, 0, 0]), u32(0), u32(decodeTime));
+        decodeTime += 16; // ~60fps at 1000 timescale
 
         const trunFlags = isKey ? 0x02000000 : 0x01010000;
-        const trun = box('trun', new Uint8Array([0, 0, 0x05, 0x01]), u32(1), u32(0), u32(dataLen), u32(trunFlags));
+        const trun = box('trun', new Uint8Array([0, 0, 0x0F, 0x01]), u32(1), u32(0), u32(trunFlags), u32(16), u32(dataLen));
         const traf = box('traf', tfhd, tfdt, trun);
         const moof = box('moof', mfhd, traf);
 
-        // Set trun dataOffset
+        // Patch trun data_offset
         const moofLen = moof.length;
         const dvMoof = new DataView(moof.buffer, moof.byteOffset, moof.byteLength);
-        dvMoof.setUint32(moofLen - 8 - 8, moofLen + 8, false);
+        dvMoof.setUint32(moofLen - 16, moofLen + 8, false);
 
         const fragment = new Uint8Array(moof.length + mdat.length);
         fragment.set(moof, 0);
         fragment.set(mdat, moof.length);
 
-        if (sourceBuffer.updating || mseQueue.length > 0) {
-          if (mseQueue.length > 10) mseQueue.shift(); // Drop stale if network lags
-          mseQueue.push(fragment);
+        if (sourceBuffer.updating || bufferQueue.length > 0) {
+          if (bufferQueue.length > 8) bufferQueue.shift(); // Drop stale if network lags
+          bufferQueue.push(fragment);
         } else {
           sourceBuffer.appendBuffer(fragment);
         }
 
-        onFrameDecoded();
+        frameCount++;
+        if (!isStreamLive && frameCount > 2) {
+          onStreamLive();
+        }
+      }
+
+      function onStreamLive() {
+        if (isStreamLive) return;
+        isStreamLive = true;
+        centerMsg.classList.add('fade-out');
+        statusDot.className = 'status-dot live';
+        statusText.innerText = 'CANLI YAYIN (0ms)';
+        video.play().catch(() => {});
       }
 
       // -------------------------------------------------------------
-      // NAL Unit Parser & Stream Distributor
+      // Annex-B NAL Unit Stream Parser
       // -------------------------------------------------------------
       function parseAnnexB(buffer) {
         const bytes = new Uint8Array(buffer);
@@ -536,95 +568,55 @@
         return nalUnits;
       }
 
-      function handleNalPacket(packetBuffer) {
+      function handlePacket(packetBuffer) {
         const nalUnits = parseAnnexB(packetBuffer);
         if (nalUnits.length === 0) return;
 
-        let hasKeyFrame = false;
-        let isConfigPacket = false;
-        const videoSlices = [];
+        let hasKey = false;
+        let hasConfig = false;
+        const slices = [];
 
         for (const nalu of nalUnits) {
           if (nalu.length === 0) continue;
           const nalType = nalu[0] & 0x1F;
 
-          if (nalType === 7) {
+          if (nalType === 7) { // SPS
             sps = nalu;
-            isConfigPacket = true;
-          } else if (nalType === 8) {
+            hasConfig = true;
+          } else if (nalType === 8) { // PPS
             pps = nalu;
-            isConfigPacket = true;
-          } else if (nalType === 5) {
-            hasKeyFrame = true;
-            videoSlices.push(nalu);
-          } else if (nalType === 1) {
-            videoSlices.push(nalu);
+            hasConfig = true;
+          } else if (nalType === 5) { // IDR Slice
+            hasKey = true;
+            slices.push(nalu);
+          } else if (nalType === 1) { // Non-IDR Slice
+            slices.push(nalu);
           }
         }
 
-        // Initialize / configure selected engine
-        if (isConfigPacket) {
-          if (activeEngine === 'webcodecs') {
-            configureWebCodecs();
-          } else if (activeEngine === 'mse') {
-            if (!mseInitSent && sourceBuffer && !sourceBuffer.updating) {
-              sendMseInitSegment();
-            }
-          }
+        if (hasConfig && sps && pps && !isInitSent && sourceBuffer && !sourceBuffer.updating) {
+          const init = generateInitSegment(sps, pps);
+          sourceBuffer.appendBuffer(init);
+          isInitSent = true;
+          console.log('H.264 Parametreleri algılandı, oynatıcı hazır.');
         }
 
-        // Forward slices to active engine
-        if (videoSlices.length > 0) {
-          if (activeEngine === 'webcodecs' && decoderConfigured && decoder.state === 'configured') {
-            let totalBytes = 0;
-            for (const s of videoSlices) totalBytes += 4 + s.length;
-            const chunkData = new Uint8Array(totalBytes);
-            let off = 0;
-            const dv = new DataView(chunkData.buffer);
-            for (const s of videoSlices) {
-              dv.setUint32(off, s.length, false);
-              off += 4;
-              chunkData.set(s, off);
-              off += s.length;
-            }
-
-            try {
-              decoder.decode(new EncodedVideoChunk({
-                type: hasKeyFrame ? 'key' : 'delta',
-                timestamp: performance.now() * 1000,
-                data: chunkData
-              }));
-            } catch (e) {
-              console.warn('Decode hatası, MSE deneniyor:', e);
-              switchToMseEngine();
-            }
-          } else if (activeEngine === 'mse') {
-            appendMseFrame(videoSlices, hasKeyFrame);
-          }
+        if (slices.length > 0 && isInitSent) {
+          appendFrame(slices, hasKey);
         }
       }
 
-      function onFrameDecoded() {
-        frameCount++;
-        if (centerMsg.style.display !== 'none') {
-          centerMsg.style.display = 'none';
-          statusDot.className = 'status-dot live';
-          statusText.innerText = 'CANLI YAYIN (0ms)';
-        }
-      }
-
-      function connectWebSocket() {
+      // -------------------------------------------------------------
+      // WebSocket Streaming Loop
+      // -------------------------------------------------------------
+      function connect() {
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
         const wsUrl = `${protocol}//${window.location.host}/ws`;
 
         statusDot.className = 'status-dot';
         statusText.innerText = 'BAĞLANILIYOR...';
 
-        if (activeEngine === 'webcodecs') {
-          initWebCodecs();
-        } else {
-          initMse();
-        }
+        initMediaSource();
 
         ws = new WebSocket(wsUrl);
         ws.binaryType = 'arraybuffer';
@@ -634,10 +626,10 @@
           statusText.innerText = 'AKIS BEKLENİYOR...';
         };
 
-        ws.onmessage = (event) => {
-          if (event.data instanceof ArrayBuffer) {
-            byteCount += event.data.byteLength;
-            handleNalPacket(event.data);
+        ws.onmessage = (e) => {
+          if (e.data instanceof ArrayBuffer) {
+            byteCount += e.data.byteLength;
+            handlePacket(e.data);
           }
         };
 
@@ -646,14 +638,15 @@
         };
 
         ws.onclose = () => {
+          isStreamLive = false;
           statusDot.className = 'status-dot';
           statusText.innerText = 'KOPUK - TEKRAR DENENİYOR';
-          centerMsg.style.display = 'block';
-          setTimeout(connectWebSocket, 1500);
+          centerMsg.classList.remove('fade-out');
+          setTimeout(connect, 1500);
         };
       }
 
-      // FPS & Bitrate calculation loop
+      // Realtime FPS & Bitrate calculation loop
       setInterval(() => {
         const now = performance.now();
         const elapsed = (now - lastFpsTime) / 1000;
@@ -670,16 +663,14 @@
         }
       }, 1000);
 
-      // Fit mode toggle
+      // Scale toggle (Fit vs Cover)
       btnFit.addEventListener('click', () => {
         if (fitMode === 'contain') {
           fitMode = 'cover';
-          canvas.style.objectFit = 'cover';
           video.style.objectFit = 'cover';
           btnFit.innerText = 'ÖLÇEK: DOLDUR';
         } else {
           fitMode = 'contain';
-          canvas.style.objectFit = 'contain';
           video.style.objectFit = 'contain';
           btnFit.innerText = 'ÖLÇEK: SIĞDIR';
         }
@@ -696,14 +687,14 @@
         }
       });
 
-      // Double click to toggle HUD
+      // Double-click to toggle HUD
       document.addEventListener('dblclick', () => {
         isHudVisible = !isHudVisible;
         hud.classList.toggle('hidden', !isHudVisible);
       });
 
-      // Start stream
-      connectWebSocket();
+      // Start stream connection
+      connect();
     })();
   </script>
 </body>
