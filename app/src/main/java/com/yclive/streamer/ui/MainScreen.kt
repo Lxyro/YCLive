@@ -39,16 +39,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.filled.GraphicEq
-import androidx.compose.material.icons.filled.OpenInBrowser
+import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.ScreenLockLandscape
-import androidx.compose.material.icons.filled.ScreenLockPortrait
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Speed
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material.icons.filled.Tv
-import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -190,7 +186,7 @@ private fun MidnightBrandHeader(isStreaming: Boolean) {
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = Icons.Default.Videocam,
+                    imageVector = Icons.Default.Tv,
                     contentDescription = "Logo",
                     tint = NeonCyan,
                     modifier = Modifier.size(24.dp)
@@ -358,7 +354,7 @@ private fun ScreenMirrorMonitorCard(
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-                        imageVector = Icons.Default.GraphicEq,
+                        imageVector = Icons.Default.Tv,
                         contentDescription = "Monitör",
                         tint = NeonCyan,
                         modifier = Modifier.size(18.dp)
@@ -450,12 +446,12 @@ private fun ScreenMirrorMonitorCard(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 ConfigBadgePill(
-                    icon = if (config.orientation == StreamOrientation.LANDSCAPE) Icons.Default.ScreenLockLandscape else Icons.Default.ScreenLockPortrait,
+                    icon = if (config.orientation == StreamOrientation.LANDSCAPE) Icons.Default.Tv else Icons.Default.PhoneAndroid,
                     text = if (config.orientation == StreamOrientation.LANDSCAPE) "Yatay (Oyun)" else "Dikey"
                 )
                 ConfigBadgePill(icon = Icons.Default.Tv, text = "${config.width}x${config.height}")
-                ConfigBadgePill(icon = Icons.Default.Speed, text = "${config.fps} FPS")
-                ConfigBadgePill(icon = Icons.Default.GraphicEq, text = "${config.bitrateMbps}M CBR")
+                ConfigBadgePill(icon = Icons.Default.PlayArrow, text = "${config.fps} FPS")
+                ConfigBadgePill(icon = Icons.Default.Tv, text = "${config.bitrateMbps}M CBR")
             }
         }
     }
@@ -534,7 +530,7 @@ private fun LiquidGlassUrlCard(
                     )
                     Spacer(modifier = Modifier.width(12.dp))
                     Icon(
-                        imageVector = Icons.Default.OpenInBrowser,
+                        imageVector = Icons.Default.Share,
                         contentDescription = "Aç",
                         tint = ElectricViolet,
                         modifier = Modifier
