@@ -12,47 +12,55 @@ val Typography = Typography(
         fontWeight = FontWeight.Bold,
         fontSize = 28.sp,
         lineHeight = 34.sp,
-        letterSpacing = 0.sp,
-        color = TextPure
+        letterSpacing = (-0.5).sp,
+        color = TextDark
     ),
     headlineMedium = TextStyle(
         fontFamily = FontFamily.SansSerif,
-        fontWeight = FontWeight.SemiBold,
+        fontWeight = FontWeight.Bold,
         fontSize = 20.sp,
         lineHeight = 26.sp,
-        letterSpacing = 0.sp,
-        color = TextPure
+        letterSpacing = (-0.3).sp,
+        color = TextDark
     ),
     titleMedium = TextStyle(
         fontFamily = FontFamily.SansSerif,
         fontWeight = FontWeight.SemiBold,
         fontSize = 16.sp,
         lineHeight = 22.sp,
-        letterSpacing = 0.15.sp,
-        color = TextPure
+        letterSpacing = (-0.2).sp,
+        color = TextDark
     ),
     bodyLarge = TextStyle(
         fontFamily = FontFamily.SansSerif,
         fontWeight = FontWeight.Normal,
         fontSize = 15.sp,
         lineHeight = 22.sp,
-        letterSpacing = 0.5.sp,
-        color = TextMuted
+        letterSpacing = 0.sp,
+        color = TextSubtle
     ),
     bodyMedium = TextStyle(
         fontFamily = FontFamily.SansSerif,
         fontWeight = FontWeight.Normal,
         fontSize = 13.sp,
         lineHeight = 18.sp,
-        letterSpacing = 0.25.sp,
-        color = TextMuted
+        letterSpacing = 0.sp,
+        color = TextSubtle
     ),
     labelLarge = TextStyle(
         fontFamily = FontFamily.SansSerif,
-        fontWeight = FontWeight.Bold,
+        fontWeight = FontWeight.SemiBold,
         fontSize = 14.sp,
         lineHeight = 20.sp,
+        letterSpacing = 0.1.sp,
+        color = TextDark
+    ),
+    labelMedium = TextStyle(
+        fontFamily = FontFamily.SansSerif,
+        fontWeight = FontWeight.Medium,
+        fontSize = 12.sp,
+        lineHeight = 16.sp,
         letterSpacing = 0.5.sp,
-        color = TextPure
+        color = TextSubtle
     )
 )

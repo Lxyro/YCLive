@@ -265,14 +265,16 @@ class ScreenCaptureService : Service() {
                                 val csd0 = newFormat.getByteBuffer("csd-0")
                                 val csd1 = newFormat.getByteBuffer("csd-1")
                                 if (csd0 != null && csd1 != null) {
-                                    val sps = ByteArray(csd0.remaining()).also { csd0.get(it) }
-                                    val pps = ByteArray(csd1.remaining()).also { csd1.get(it) }
+                                    val spsRaw = ByteArray(csd0.remaining()).also { csd0.get(it) }
+                                    val ppsRaw = ByteArray(csd1.remaining()).also { csd1.get(it) }
+                                    val sps = ensureAnnexBStartCode(spsRaw)
+                                    val pps = ensureAnnexBStartCode(ppsRaw)
                                     val combined = ByteArray(sps.size + pps.size)
                                     System.arraycopy(sps, 0, combined, 0, sps.size)
                                     System.arraycopy(pps, 0, combined, sps.size, pps.size)
                                     localStreamServer?.cachedConfigBuffer = combined
                                     localStreamServer?.broadcastFrame(combined)
-                                    Log.i(tag, "csd-0 ve csd-1 formatından SPS/PPS önbelleklendi (${combined.size} bayt)")
+                                    Log.i(tag, "csd-0 ve csd-1 formatından Annex-B SPS/PPS hazırlandı (${combined.size} bayt)")
                                 }
                             } catch (e: Exception) {
                                 Log.w(tag, "csd çıkarılamadı: ${e.message}")
@@ -285,17 +287,32 @@ class ScreenCaptureService : Service() {
                                 outputBuffer.position(bufferInfo.offset)
                                 outputBuffer.limit(bufferInfo.offset + bufferInfo.size)
 
-                                val frameData = ByteArray(bufferInfo.size)
-                                outputBuffer.get(frameData)
+                                val rawData = ByteArray(bufferInfo.size)
+                                outputBuffer.get(rawData)
+                                val frameData = ensureAnnexBStartCode(rawData)
 
-                                // Check if this is Codec Config (SPS / PPS)
-                                if ((bufferInfo.flags and MediaCodec.BUFFER_FLAG_CODEC_CONFIG) != 0) {
+                                val isConfig = (bufferInfo.flags and MediaCodec.BUFFER_FLAG_CODEC_CONFIG) != 0
+                                val isKeyFrame = (bufferInfo.flags and MediaCodec.BUFFER_FLAG_KEY_FRAME) != 0
+
+                                if (isConfig) {
                                     Log.d(tag, "Codec Config (SPS/PPS) tespit edildi (${frameData.size} bayt)")
                                     localStreamServer?.cachedConfigBuffer = frameData
+                                    localStreamServer?.broadcastFrame(frameData)
+                                } else if (isKeyFrame) {
+                                    val cached = localStreamServer?.cachedConfigBuffer
+                                    val packetToSend = if (cached != null && !hasSpsHeader(frameData)) {
+                                        val combined = ByteArray(cached.size + frameData.size)
+                                        System.arraycopy(cached, 0, combined, 0, cached.size)
+                                        System.arraycopy(frameData, 0, combined, cached.size, frameData.size)
+                                        combined
+                                    } else {
+                                        frameData
+                                    }
+                                    localStreamServer?.broadcastFrame(packetToSend)
+                                } else {
+                                    // Regular P-Frame
+                                    localStreamServer?.broadcastFrame(frameData)
                                 }
-
-                                // Broadcast Annex-B packet over WebSocket
-                                localStreamServer?.broadcastFrame(frameData)
                             }
 
                             encoder.releaseOutputBuffer(outputBufferIndex, false)
@@ -309,6 +326,36 @@ class ScreenCaptureService : Service() {
                 }
             }
         }
+    }
+
+    private fun ensureAnnexBStartCode(data: ByteArray): ByteArray {
+        if (data.size >= 4 && data[0] == 0.toByte() && data[1] == 0.toByte() && data[2] == 0.toByte() && data[3] == 1.toByte()) {
+            return data
+        }
+        if (data.size >= 3 && data[0] == 0.toByte() && data[1] == 0.toByte() && data[2] == 1.toByte()) {
+            val res = ByteArray(data.size + 1)
+            res[0] = 0
+            System.arraycopy(data, 0, res, 1, data.size)
+            return res
+        }
+        val res = ByteArray(data.size + 4)
+        res[0] = 0; res[1] = 0; res[2] = 0; res[3] = 1
+        System.arraycopy(data, 0, res, 4, data.size)
+        return res
+    }
+
+    private fun hasSpsHeader(data: ByteArray): Boolean {
+        val checkLen = minOf(data.size - 4, 32)
+        for (i in 0 until checkLen) {
+            if (data[i] == 0.toByte() && data[i + 1] == 0.toByte() && data[i + 2] == 1.toByte()) {
+                val nalType = data[i + 3].toInt() and 0x1F
+                if (nalType == 7) return true
+            } else if (data[i] == 0.toByte() && data[i + 1] == 0.toByte() && data[i + 2] == 0.toByte() && data[i + 3] == 1.toByte()) {
+                val nalType = data[i + 4].toInt() and 0x1F
+                if (nalType == 7) return true
+            }
+        }
+        return false
     }
 
     /**

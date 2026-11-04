@@ -1,36 +1,44 @@
 <!DOCTYPE html>
 <html lang="tr">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>YC Live - Monochrome Liquid Glass Mirror</title>
+  <title>YC Live - Apple Liquid Glass Mirror</title>
+  <script src="/jmuxer.min.js"></script>
   <style>
     :root {
-      --bg-black: #000000;
-      --glass-surface: rgba(255, 255, 255, 0.07);
-      --glass-surface-hover: rgba(255, 255, 255, 0.12);
-      --glass-border: rgba(255, 255, 255, 0.15);
-      --glass-border-highlight: rgba(255, 255, 255, 0.3);
+      --bg-canvas: #09090B;
+      --glass-surface: rgba(255, 255, 255, 0.08);
+      --glass-surface-hover: rgba(255, 255, 255, 0.14);
+      --glass-border: rgba(255, 255, 255, 0.14);
+      --glass-border-bright: rgba(255, 255, 255, 0.28);
       --text-pure: #FFFFFF;
       --text-muted: #A1A1AA;
       --text-dim: #71717A;
       --live-green: #10B981;
+      --apple-blur: blur(28px) saturate(180%);
     }
+
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
       user-select: none;
+      -webkit-user-select: none;
     }
-    html, body {
+
+    html,
+    body {
       width: 100%;
       height: 100%;
-      background-color: var(--bg-black);
+      background-color: var(--bg-canvas);
       color: var(--text-pure);
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif;
       overflow: hidden;
     }
-    #viewport-container {
+
+    #viewport {
       position: relative;
       width: 100vw;
       height: 100vh;
@@ -39,7 +47,8 @@
       justify-content: center;
       background: #000000;
     }
-    video, canvas {
+
+    video {
       width: 100%;
       height: 100%;
       object-fit: contain;
@@ -48,49 +57,63 @@
       background: transparent;
     }
 
-    /* Minimalist Apple Liquid Glass HUD */
-    .hud-overlay {
+    /* Minimalist Apple Frosted Glass Top HUD */
+    .hud-bar {
       position: absolute;
-      top: 20px;
-      left: 20px;
-      right: 20px;
+      top: 18px;
+      left: 18px;
+      right: 18px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       pointer-events: none;
-      transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-      z-index: 20;
+      transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 30;
     }
-    .hud-overlay.hidden {
+
+    .hud-bar.hidden {
       opacity: 0;
-      transform: translateY(-8px);
+      transform: translateY(-10px);
     }
-    .glass-group {
+
+    .hud-group {
       display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
+      gap: 8px;
       align-items: center;
+      flex-wrap: wrap;
     }
-    .glass-pill {
+
+    .hud-pill {
       background: var(--glass-surface);
       border: 1px solid var(--glass-border);
-      backdrop-filter: blur(28px) saturate(180%);
-      -webkit-backdrop-filter: blur(28px) saturate(180%);
-      padding: 8px 16px;
+      backdrop-filter: var(--apple-blur);
+      -webkit-backdrop-filter: var(--apple-blur);
+      padding: 7px 14px;
       border-radius: 9999px;
       font-size: 13px;
       font-weight: 500;
       letter-spacing: -0.2px;
       display: flex;
       align-items: center;
-      gap: 8px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+      gap: 7px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.12);
     }
-    .brand-title {
+
+    .brand-mark {
       font-weight: 700;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.3px;
       color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
+
+    .brand-mark svg {
+      width: 16px;
+      height: 16px;
+      fill: #FFFFFF;
+    }
+
     .status-dot {
       width: 7px;
       height: 7px;
@@ -98,139 +121,166 @@
       background-color: #EF4444;
       transition: all 0.3s ease;
     }
+
     .status-dot.live {
       background-color: var(--live-green);
       box-shadow: 0 0 10px var(--live-green);
-      animation: pulse 1.8s infinite;
+      animation: pulseLive 1.8s infinite;
     }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.4; transform: scale(1.15); }
+
+    @keyframes pulseLive {
+      0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+      50% {
+        opacity: 0.4;
+        transform: scale(1.18);
+      }
     }
-    .val-highlight {
+
+    .num-val {
       font-weight: 600;
       color: #FFFFFF;
       font-variant-numeric: tabular-nums;
     }
 
-    /* Monochrome Action Controls */
+    /* Minimalist Interactive Buttons */
     .controls-group {
       display: flex;
-      gap: 10px;
+      gap: 8px;
       pointer-events: auto;
     }
-    .glass-btn {
+
+    .apple-btn {
       background: var(--glass-surface);
       border: 1px solid var(--glass-border);
       color: #FFFFFF;
-      padding: 8px 18px;
+      padding: 7px 15px;
       border-radius: 9999px;
       font-size: 12px;
       font-weight: 600;
       letter-spacing: -0.1px;
       cursor: pointer;
-      backdrop-filter: blur(28px);
-      -webkit-backdrop-filter: blur(28px);
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+      backdrop-filter: var(--apple-blur);
+      -webkit-backdrop-filter: var(--apple-blur);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.12);
       transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    .glass-btn:hover {
+
+    .apple-btn:hover {
       background: var(--glass-surface-hover);
-      border-color: var(--glass-border-highlight);
+      border-color: var(--glass-border-bright);
       transform: translateY(-1px);
     }
-    .glass-btn:active {
+
+    .apple-btn:active {
       transform: translateY(0);
-      background: rgba(255, 255, 255, 0.18);
+      background: rgba(255, 255, 255, 0.2);
     }
 
-    /* Center Toast Message */
-    #center-message {
+    /* Center Status Overlay */
+    #center-card {
       position: absolute;
       text-align: center;
       pointer-events: none;
-      z-index: 10;
-      background: rgba(18, 18, 20, 0.8);
-      backdrop-filter: blur(35px) saturate(190%);
-      -webkit-backdrop-filter: blur(35px) saturate(190%);
-      padding: 34px 48px;
-      border-radius: 28px;
+      z-index: 20;
+      background: rgba(22, 22, 25, 0.78);
+      backdrop-filter: blur(40px) saturate(190%);
+      -webkit-backdrop-filter: blur(40px) saturate(190%);
+      padding: 34px 44px;
+      border-radius: 26px;
       border: 1px solid var(--glass-border);
-      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.15);
       transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    #center-message.fade-out {
+
+    #center-card.hidden {
       opacity: 0;
-      transform: scale(0.96);
+      transform: scale(0.95);
       pointer-events: none;
     }
-    #center-message h2 {
-      font-size: 20px;
+
+    #center-card h2 {
+      font-size: 19px;
       font-weight: 700;
-      letter-spacing: -0.4px;
-      margin-bottom: 8px;
+      letter-spacing: -0.3px;
+      margin-bottom: 6px;
       color: #FFFFFF;
     }
-    #center-message p {
+
+    #center-card p {
       font-size: 13px;
       color: var(--text-muted);
-      line-height: 1.5;
+      line-height: 1.45;
     }
-    .spinner {
-      margin: 20px auto 0;
-      width: 32px;
-      height: 32px;
-      border: 2px solid rgba(255, 255, 255, 0.12);
+
+    .ios-spinner {
+      margin: 18px auto 0;
+      width: 28px;
+      height: 28px;
+      border: 2.5px solid rgba(255, 255, 255, 0.15);
       border-top-color: #FFFFFF;
       border-radius: 50%;
-      animation: spin 0.75s linear infinite;
+      animation: spin 0.8s linear infinite;
     }
+
     @keyframes spin {
-      to { transform: rotate(360deg); }
+      to {
+        transform: rotate(360deg);
+      }
     }
   </style>
 </head>
+
 <body>
-  <div id="viewport-container">
-    <div class="hud-overlay" id="hud">
-      <div class="glass-group">
-        <div class="glass-pill">
-          <span class="brand-title">YC LIVE</span>
+  <div id="viewport">
+    <!-- Apple Liquid Glass Top HUD -->
+    <div class="hud-bar" id="hud">
+      <div class="hud-group">
+        <div class="hud-pill">
+          <span class="brand-mark">
+            <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"/></svg>
+            YC LIVE
+          </span>
         </div>
-        <div class="glass-pill">
-          <span class="status-dot" id="status-dot"></span>
-          <span id="status-text">BAĞLANILIYOR...</span>
+        <div class="hud-pill">
+          <span class="status-dot" id="dot"></span>
+          <span id="status-title">BAĞLANIYOR...</span>
         </div>
-        <div class="glass-pill">
+        <div class="hud-pill">
           <span style="color:var(--text-dim)">FPS:</span>
-          <span class="val-highlight" id="fps-val">--</span>
+          <span class="num-val" id="fps-label">--</span>
         </div>
-        <div class="glass-pill">
+        <div class="hud-pill">
           <span style="color:var(--text-dim)">BİTRATE:</span>
-          <span class="val-highlight" id="bitrate-val">-- Mbps</span>
+          <span class="num-val" id="bitrate-label">-- Mbps</span>
         </div>
-        <div class="glass-pill">
+        <div class="hud-pill">
           <span style="color:var(--text-dim)">ÇÖZÜNÜRLÜK:</span>
-          <span class="val-highlight" id="res-val">-- x --</span>
+          <span class="num-val" id="res-label">-- x --</span>
         </div>
-        <div class="glass-pill">
+        <div class="hud-pill">
           <span style="color:var(--text-dim)">GECİKME:</span>
-          <span class="val-highlight" id="mode-val">SIFIR GECİKME</span>
+          <span class="num-val" style="color:#10B981">&lt;40ms</span>
         </div>
       </div>
+
       <div class="controls-group">
-        <button class="glass-btn" id="btn-fit">ÖLÇEK: SIĞDIR</button>
-        <button class="glass-btn" id="btn-fullscreen">TAM EKRAN</button>
+        <button class="apple-btn" id="btn-scale">ÖLÇEK: SIĞDIR</button>
+        <button class="apple-btn" id="btn-pip">PİP</button>
+        <button class="apple-btn" id="btn-fullscreen">TAM EKRAN</button>
       </div>
     </div>
 
-    <div id="center-message">
-      <h2 id="msg-title">YC LIVE BAĞLANTISI</h2>
-      <p id="msg-subtitle">Android cihazından H.264 donanım akışı bekleniyor...</p>
-      <div class="spinner" id="spinner"></div>
+    <!-- Center Connecting Overlay -->
+    <div id="center-card">
+      <h2 id="card-title">YC LIVE BAĞLANTISI</h2>
+      <p id="card-sub">Android cihazından H.264 ultra düşük gecikmeli akış bekleniyor...</p>
+      <div class="ios-spinner" id="spinner"></div>
     </div>
 
-    <!-- Video Element for Zero-Latency Playback -->
+    <!-- Hardware-Accelerated Video Player -->
     <video id="video-player" playsinline autoplay muted></video>
   </div>
 
@@ -239,397 +289,123 @@
       'use strict';
 
       const video = document.getElementById('video-player');
-      const statusDot = document.getElementById('status-dot');
-      const statusText = document.getElementById('status-text');
-      const fpsVal = document.getElementById('fps-val');
-      const bitrateVal = document.getElementById('bitrate-val');
-      const resVal = document.getElementById('res-val');
-      const centerMsg = document.getElementById('center-message');
+      const dot = document.getElementById('dot');
+      const statusTitle = document.getElementById('status-title');
+      const fpsLabel = document.getElementById('fps-label');
+      const bitrateLabel = document.getElementById('bitrate-label');
+      const resLabel = document.getElementById('res-label');
+      const centerCard = document.getElementById('center-card');
       const hud = document.getElementById('hud');
+      const btnScale = document.getElementById('btn-scale');
+      const btnPip = document.getElementById('btn-pip');
       const btnFullscreen = document.getElementById('btn-fullscreen');
-      const btnFit = document.getElementById('btn-fit');
 
       let ws = null;
-      let sps = null;
-      let pps = null;
+      let jmuxer = null;
       let frameCount = 0;
       let byteCount = 0;
-      let lastFpsTime = performance.now();
+      let lastMetricsTime = performance.now();
+      let isLive = false;
       let fitMode = 'contain';
       let isHudVisible = true;
-      let isStreamLive = false;
 
-      // -------------------------------------------------------------
-      // ISO-BMFF (fMP4) Box Construction Utilities
-      // -------------------------------------------------------------
-      function u32(val) {
-        return new Uint8Array([(val >> 24) & 0xFF, (val >> 16) & 0xFF, (val >> 8) & 0xFF, val & 0xFF]);
-      }
-      function u16(val) {
-        return new Uint8Array([(val >> 8) & 0xFF, val & 0xFF]);
-      }
-      function str(s) {
-        const a = new Uint8Array(s.length);
-        for (let i = 0; i < s.length; i++) a[i] = s.charCodeAt(i);
-        return a;
-      }
-      function box(type, ...payloads) {
-        let size = 8;
-        for (const p of payloads) size += p.length;
-        const b = new Uint8Array(size);
-        b.set(u32(size), 0);
-        b.set(str(type), 4);
-        let offset = 8;
-        for (const p of payloads) {
-          b.set(p, offset);
-          offset += p.length;
-        }
-        return b;
-      }
-
-      function buildAvcC(spsData, ppsData) {
-        const totalLen = 7 + spsData.length + 1 + 2 + ppsData.length;
-        const avcC = new Uint8Array(totalLen);
-        let off = 0;
-        avcC[off++] = 0x01; // configurationVersion
-        avcC[off++] = spsData[1]; // profile
-        avcC[off++] = spsData[2]; // compatibility
-        avcC[off++] = spsData[3]; // level
-        avcC[off++] = 0xFF; // lengthSizeMinusOne | reserved
-        avcC[off++] = 0xE1; // numOfSPS | reserved (1 SPS)
-        avcC[off++] = (spsData.length >> 8) & 0xFF;
-        avcC[off++] = spsData.length & 0xFF;
-        avcC.set(spsData, off);
-        off += spsData.length;
-        avcC[off++] = 0x01; // numOfPPS
-        avcC[off++] = (ppsData.length >> 8) & 0xFF;
-        avcC[off++] = ppsData.length & 0xFF;
-        avcC.set(ppsData, off);
-        return avcC;
-      }
-
-      // Generate 100% compliant ISO/IEC 14496-12 fMP4 initialization segment (ftyp + moov)
-      function generateInitSegment(spsData, ppsData) {
-        const ftyp = box('ftyp', str('isom'), u32(0x200), str('isom'), str('iso2'), str('avc1'), str('mp41'));
-
-        // mvhd (timescale = 1000)
-        const mvhd = box('mvhd',
-          new Uint8Array(8), // version(1) + flags(3) + creation(4)
-          new Uint8Array(4), // mod_time
-          u32(1000),         // timescale
-          new Uint8Array(4), // duration = 0
-          u32(0x00010000),   // rate = 1.0
-          u16(0x0100),       // volume = 1.0
-          new Uint8Array(10),// reserved
-          // 36 bytes identity matrix
-          u32(0x00010000), u32(0), u32(0),
-          u32(0), u32(0x00010000), u32(0),
-          u32(0), u32(0), u32(0x40000000),
-          new Uint8Array(24),// pre_defined
-          u32(2)             // next_track_id
-        );
-
-        // tkhd (trackId = 1, enabled, inMovie)
-        const tkhd = box('tkhd',
-          new Uint8Array([0, 0, 0, 1]), // version + flags (enabled)
-          new Uint8Array(4),            // creation_time
-          new Uint8Array(4),            // mod_time
-          u32(1),                       // track_id = 1
-          new Uint8Array(4),            // reserved
-          new Uint8Array(4),            // duration = 0
-          new Uint8Array(8),            // reserved
-          new Uint8Array(2),            // layer = 0
-          new Uint8Array(2),            // alternate_group = 0
-          new Uint8Array(2),            // volume = 0
-          new Uint8Array(2),            // reserved
-          // 36 bytes identity matrix
-          u32(0x00010000), u32(0), u32(0),
-          u32(0), u32(0x00010000), u32(0),
-          u32(0), u32(0), u32(0x40000000),
-          u32(1920 << 16),              // default width
-          u32(1080 << 16)               // default height
-        );
-
-        // mdhd (timescale = 1000)
-        const mdhd = box('mdhd',
-          new Uint8Array(12), // version(1)+flags(3)+creation(4)+mod_time(4)
-          u32(1000),          // timescale = 1000
-          new Uint8Array(4),  // duration = 0
-          u16(0x55C4),        // language = 'und'
-          new Uint8Array(2)   // pre_defined
-        );
-
-        // hdlr (vide)
-        const hdlr = box('hdlr',
-          new Uint8Array(4),  // version + flags
-          new Uint8Array(4),  // pre_defined
-          str('vide'),        // handler_type
-          new Uint8Array(12), // reserved
-          str('VideoHandler\0')
-        );
-
-        // vmhd
-        const vmhd = box('vmhd', new Uint8Array([0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0]));
-
-        // dinf -> dref -> url
-        const dinf = box('dinf', box('dref', new Uint8Array([0, 0, 0, 0, 0, 0, 0, 1]), box('url ', new Uint8Array([0, 0, 0, 1]))));
-
-        // avcC
-        const avcC = buildAvcC(spsData, ppsData);
-
-        // avc1 (VisualSampleEntry)
-        const avc1Header = new Uint8Array([
-          0, 0, 0, 0, 0, 0,  // reserved (6)
-          0, 1,              // data_reference_index = 1
-          0, 0,              // pre_defined (2)
-          0, 0,              // reserved (2)
-          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // pre_defined (12)
-          (1920 >> 8) & 0xFF, 1920 & 0xFF,    // width
-          (1080 >> 8) & 0xFF, 1080 & 0xFF,    // height
-          0x00, 0x48, 0x00, 0x00,             // horizresolution = 72 dpi
-          0x00, 0x48, 0x00, 0x00,             // vertresolution = 72 dpi
-          0, 0, 0, 0,                         // reserved
-          0, 1,                               // frame_count = 1
-          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // compressorname (32 bytes)
-          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-          0, 0, 0, 0, 0, 0, 0, 0,
-          0, 24,                              // depth = 24
-          0xFF, 0xFF                          // pre_defined = -1
-        ]);
-        const avc1 = box('avc1', avc1Header, avcC);
-
-        // stbl
-        const stsd = box('stsd', new Uint8Array(4), u32(1), avc1);
-        const stts = box('stts', new Uint8Array(8));
-        const stsc = box('stsc', new Uint8Array(8));
-        const stsz = box('stsz', new Uint8Array(12));
-        const stco = box('stco', new Uint8Array(8));
-        const stbl = box('stbl', stsd, stts, stsc, stsz, stco);
-
-        // minf -> mdia -> trak
-        const minf = box('minf', vmhd, dinf, stbl);
-        const mdia = box('mdia', mdhd, hdlr, minf);
-        const trak = box('trak', tkhd, mdia);
-
-        // mvex -> trex
-        const trex = box('trex', new Uint8Array(4), u32(1), u32(1), new Uint8Array(12));
-        const mvex = box('mvex', trex);
-
-        const moov = box('moov', mvhd, trak, mvex);
-
-        const init = new Uint8Array(ftyp.length + moov.length);
-        init.set(ftyp, 0);
-        init.set(moov, ftyp.length);
-        return init;
-      }
-
-      // -------------------------------------------------------------
-      // MediaSource Engine Management
-      // -------------------------------------------------------------
-      let mediaSource = null;
-      let sourceBuffer = null;
-      let isInitSent = false;
-      let bufferQueue = [];
-      let sequenceNumber = 1;
-      let decodeTime = 0;
-
-      function initMediaSource() {
-        if (!window.MediaSource) {
-          console.error('MediaSource bu tarayıcıda desteklenmiyor.');
-          return;
-        }
-
-        mediaSource = new MediaSource();
-        video.src = URL.createObjectURL(mediaSource);
-
-        mediaSource.addEventListener('sourceopen', () => {
-          try {
-            sourceBuffer = mediaSource.addSourceBuffer('video/mp4; codecs="avc1.42002a"');
-            sourceBuffer.mode = 'sequence';
-
-            sourceBuffer.addEventListener('updateend', () => {
-              if (bufferQueue.length > 0 && !sourceBuffer.updating) {
-                const nextChunk = bufferQueue.shift();
-                sourceBuffer.appendBuffer(nextChunk);
-              }
-
-              // Zero-latency live edge chase (<60ms sync)
-              if (video.buffered.length > 0) {
-                const end = video.buffered.end(video.buffered.length - 1);
-                if (end - video.currentTime > 0.08) {
-                  video.currentTime = end - 0.01;
-                }
-              }
-            });
-
-            if (sps && pps && !isInitSent) {
-              const init = generateInitSegment(sps, pps);
-              sourceBuffer.appendBuffer(init);
-              isInitSent = true;
-              console.log('Valid ISO-BMFF Init segment appended.');
-            }
-          } catch (e) {
-            console.error('AddSourceBuffer hatası:', e);
+      function initJMuxer() {
+        if (jmuxer) return;
+        try {
+          if (typeof JMuxer === 'undefined') {
+            console.warn('JMuxer henüz yüklenmedi, 100ms sonra tekrar denenecek...');
+            setTimeout(initJMuxer, 100);
+            return;
           }
-        });
 
-        video.addEventListener('loadedmetadata', () => {
-          video.play().catch(() => {});
-          resVal.innerText = `${video.videoWidth}x${video.videoHeight}`;
-        });
-
-        video.addEventListener('playing', () => {
-          onStreamLive();
-        });
-      }
-
-      function appendFrame(slices, isKey) {
-        if (!sourceBuffer || !isInitSent) return;
-
-        let dataLen = 0;
-        for (const s of slices) dataLen += 4 + s.length;
-
-        const mdatPayload = new Uint8Array(dataLen);
-        let off = 0;
-        const dv = new DataView(mdatPayload.buffer);
-        for (const s of slices) {
-          dv.setUint32(off, s.length, false); // 4-byte NAL length
-          off += 4;
-          mdatPayload.set(s, off);
-          off += s.length;
-        }
-
-        const mdat = box('mdat', mdatPayload);
-
-        // moof header
-        const mfhd = box('mfhd', new Uint8Array(4), u32(sequenceNumber++));
-        const tfhd = box('tfhd', new Uint8Array([0, 0x02, 0, 0]), u32(1)); // default-base-is-moof
-        const tfdt = box('tfdt', new Uint8Array([1, 0, 0, 0]), u32(0), u32(decodeTime));
-        decodeTime += 16; // ~60fps at 1000 timescale
-
-        const trunFlags = isKey ? 0x02000000 : 0x01010000;
-        const trun = box('trun', new Uint8Array([0, 0, 0x0F, 0x01]), u32(1), u32(0), u32(trunFlags), u32(16), u32(dataLen));
-        const traf = box('traf', tfhd, tfdt, trun);
-        const moof = box('moof', mfhd, traf);
-
-        // Patch trun data_offset
-        const moofLen = moof.length;
-        const dvMoof = new DataView(moof.buffer, moof.byteOffset, moof.byteLength);
-        dvMoof.setUint32(moofLen - 16, moofLen + 8, false);
-
-        const fragment = new Uint8Array(moof.length + mdat.length);
-        fragment.set(moof, 0);
-        fragment.set(mdat, moof.length);
-
-        if (sourceBuffer.updating || bufferQueue.length > 0) {
-          if (bufferQueue.length > 8) bufferQueue.shift(); // Drop stale if network lags
-          bufferQueue.push(fragment);
-        } else {
-          sourceBuffer.appendBuffer(fragment);
-        }
-
-        frameCount++;
-        if (!isStreamLive && frameCount > 2) {
-          onStreamLive();
+          jmuxer = new JMuxer({
+            node: 'video-player',
+            mode: 'video',
+            flushingTime: 0,
+            fps: 60,
+            clearBuffer: true,
+            debug: false,
+            onError: function (err) {
+              console.warn('JMuxer event:', err);
+            }
+          });
+          console.log('JMuxer sıfır gecikme motoru başarıyla başlatıldı.');
+        } catch (e) {
+          console.error('JMuxer ilklendirme hatası:', e);
         }
       }
 
-      function onStreamLive() {
-        if (isStreamLive) return;
-        isStreamLive = true;
-        centerMsg.classList.add('fade-out');
-        statusDot.className = 'status-dot live';
-        statusText.innerText = 'CANLI YAYIN (0ms)';
+      function onLiveStreamActive() {
+        if (isLive) return;
+        isLive = true;
+        centerCard.classList.add('hidden');
+        dot.className = 'status-dot live';
+        statusTitle.innerText = 'CANLI (0ms)';
         video.play().catch(() => {});
+        updateResolution();
       }
 
-      // -------------------------------------------------------------
-      // Annex-B NAL Unit Stream Parser
-      // -------------------------------------------------------------
-      function parseAnnexB(buffer) {
-        const bytes = new Uint8Array(buffer);
-        const nalUnits = [];
-        const len = bytes.length;
-        let lastIndex = -1;
+      function updateResolution() {
+        if (video.videoWidth > 0 && video.videoHeight > 0) {
+          resLabel.innerText = `${video.videoWidth}x${video.videoHeight}`;
+        }
+      }
 
-        for (let i = 0; i < len - 3; i++) {
-          if (bytes[i] === 0 && bytes[i + 1] === 0 && (bytes[i + 2] === 1 || (bytes[i + 2] === 0 && bytes[i + 3] === 1))) {
-            const startCodeLen = (bytes[i + 2] === 1) ? 3 : 4;
-            if (lastIndex !== -1) {
-              nalUnits.push(bytes.subarray(lastIndex, i));
-            }
-            lastIndex = i + startCodeLen;
-            if (startCodeLen === 4) i++;
+      video.addEventListener('canplay', () => {
+        video.play().catch(() => {});
+      });
+
+      video.addEventListener('playing', () => {
+        onLiveStreamActive();
+      });
+
+      video.addEventListener('loadedmetadata', updateResolution);
+      video.addEventListener('resize', updateResolution);
+
+      video.addEventListener('timeupdate', () => {
+        onLiveStreamActive();
+        // Aggressive Live Edge Chase for 0-40ms latency
+        if (video.buffered.length > 0) {
+          const end = video.buffered.end(video.buffered.length - 1);
+          const drift = end - video.currentTime;
+          if (drift > 0.08) {
+            video.currentTime = end - 0.01;
           }
         }
-        if (lastIndex !== -1 && lastIndex < len) {
-          nalUnits.push(bytes.subarray(lastIndex));
-        }
-        return nalUnits;
-      }
+      });
 
-      function handlePacket(packetBuffer) {
-        const nalUnits = parseAnnexB(packetBuffer);
-        if (nalUnits.length === 0) return;
+      function connectWebSocket() {
+        initJMuxer();
 
-        let hasKey = false;
-        let hasConfig = false;
-        const slices = [];
-
-        for (const nalu of nalUnits) {
-          if (nalu.length === 0) continue;
-          const nalType = nalu[0] & 0x1F;
-
-          if (nalType === 7) { // SPS
-            sps = nalu;
-            hasConfig = true;
-          } else if (nalType === 8) { // PPS
-            pps = nalu;
-            hasConfig = true;
-          } else if (nalType === 5) { // IDR Slice
-            hasKey = true;
-            slices.push(nalu);
-          } else if (nalType === 1) { // Non-IDR Slice
-            slices.push(nalu);
-          }
-        }
-
-        if (hasConfig && sps && pps && !isInitSent && sourceBuffer && !sourceBuffer.updating) {
-          const init = generateInitSegment(sps, pps);
-          sourceBuffer.appendBuffer(init);
-          isInitSent = true;
-          console.log('H.264 Parametreleri algılandı, oynatıcı hazır.');
-        }
-
-        if (slices.length > 0 && isInitSent) {
-          appendFrame(slices, hasKey);
-        }
-      }
-
-      // -------------------------------------------------------------
-      // WebSocket Streaming Loop
-      // -------------------------------------------------------------
-      function connect() {
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
         const wsUrl = `${protocol}//${window.location.host}/ws`;
 
-        statusDot.className = 'status-dot';
-        statusText.innerText = 'BAĞLANILIYOR...';
-
-        initMediaSource();
+        dot.className = 'status-dot';
+        statusTitle.innerText = 'BAĞLANILIYOR...';
 
         ws = new WebSocket(wsUrl);
         ws.binaryType = 'arraybuffer';
 
         ws.onopen = () => {
           console.log('YC Live WebSocket bağlantısı kuruldu.');
-          statusText.innerText = 'AKIS BEKLENİYOR...';
+          statusTitle.innerText = 'AKIS BEKLENİYOR...';
         };
 
         ws.onmessage = (e) => {
           if (e.data instanceof ArrayBuffer) {
             byteCount += e.data.byteLength;
-            handlePacket(e.data);
+            frameCount++;
+
+            if (!jmuxer) initJMuxer();
+            if (jmuxer) {
+              jmuxer.feed({
+                video: new Uint8Array(e.data)
+              });
+            }
+
+            if (!isLive && frameCount > 2) {
+              onLiveStreamActive();
+            }
           }
         };
 
@@ -638,45 +414,45 @@
         };
 
         ws.onclose = () => {
-          isStreamLive = false;
-          statusDot.className = 'status-dot';
-          statusText.innerText = 'KOPUK - TEKRAR DENENİYOR';
-          centerMsg.classList.remove('fade-out');
-          setTimeout(connect, 1500);
+          isLive = false;
+          dot.className = 'status-dot';
+          statusTitle.innerText = 'BAĞLANTI KOPTU';
+          centerCard.classList.remove('hidden');
+          setTimeout(connectWebSocket, 1500);
         };
       }
 
-      // Realtime FPS & Bitrate calculation loop
+      // Bitrate & FPS loop
       setInterval(() => {
         const now = performance.now();
-        const elapsed = (now - lastFpsTime) / 1000;
+        const elapsed = (now - lastMetricsTime) / 1000;
         if (elapsed > 0) {
           const fps = Math.round(frameCount / elapsed);
           const mbps = ((byteCount * 8) / (elapsed * 1000000)).toFixed(1);
 
-          fpsVal.innerText = fps.toString();
-          bitrateVal.innerText = `${mbps} Mbps`;
+          fpsLabel.innerText = fps.toString();
+          bitrateLabel.innerText = `${mbps} Mbps`;
 
           frameCount = 0;
           byteCount = 0;
-          lastFpsTime = now;
+          lastMetricsTime = now;
         }
+        updateResolution();
       }, 1000);
 
-      // Scale toggle (Fit vs Cover)
-      btnFit.addEventListener('click', () => {
+      // Button Controls
+      btnScale.addEventListener('click', () => {
         if (fitMode === 'contain') {
           fitMode = 'cover';
           video.style.objectFit = 'cover';
-          btnFit.innerText = 'ÖLÇEK: DOLDUR';
+          btnScale.innerText = 'ÖLÇEK: DOLDUR';
         } else {
           fitMode = 'contain';
           video.style.objectFit = 'contain';
-          btnFit.innerText = 'ÖLÇEK: SIĞDIR';
+          btnScale.innerText = 'ÖLÇEK: SIĞDIR';
         }
       });
 
-      // Fullscreen toggle
       btnFullscreen.addEventListener('click', () => {
         if (!document.fullscreenElement) {
           document.documentElement.requestFullscreen().catch(() => {});
@@ -687,15 +463,27 @@
         }
       });
 
-      // Double-click to toggle HUD
+      btnPip.addEventListener('click', async () => {
+        try {
+          if (document.pictureInPictureElement) {
+            await document.exitPictureInPicture();
+          } else if (document.pictureInPictureEnabled && video.readyState >= 2) {
+            await video.requestPictureInPicture();
+          }
+        } catch (e) {
+          console.warn('PiP hatası:', e);
+        }
+      });
+
+      // Double Click to toggle HUD
       document.addEventListener('dblclick', () => {
         isHudVisible = !isHudVisible;
         hud.classList.toggle('hidden', !isHudVisible);
       });
 
-      // Start stream connection
-      connect();
+      connectWebSocket();
     })();
   </script>
 </body>
+
 </html>

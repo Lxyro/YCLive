@@ -53,6 +53,16 @@ class LocalStreamServer(
         loadHtmlPlayer()
     }
 
+    // Cache jmuxer.min.js content
+    private val jmuxerJsContent: String by lazy {
+        try {
+            context.assets.open("jmuxer.min.js").bufferedReader().use { it.readText() }
+        } catch (e: Exception) {
+            Log.e(tag, "jmuxer.min.js okunamadı: ${e.message}")
+            ""
+        }
+    }
+
     fun start() {
         if (engine != null) return
 
@@ -68,9 +78,14 @@ class LocalStreamServer(
                 }
 
                 routing {
-                    // Serve Zero-Latency WebCodecs HTML5 Player
+                    // Serve Zero-Latency WebCodecs / JMuxer HTML5 Player
                     get("/") {
                         call.respondText(htmlContent, ContentType.Text.Html)
+                    }
+
+                    // Serve JMuxer Engine
+                    get("/jmuxer.min.js") {
+                        call.respondText(jmuxerJsContent, ContentType.parse("application/javascript"))
                     }
 
                     // JSON Server Status

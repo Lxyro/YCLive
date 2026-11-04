@@ -1,27 +1,27 @@
 package com.yclive.streamer.ui.theme
 
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 
-private val MonochromeLiquidColorScheme = darkColorScheme(
-    primary = PureWhite,
-    secondary = PureWhite,
-    tertiary = MutedSlate,
-    background = ObsidianBlack,
-    surface = SurfaceDark,
-    surfaceVariant = GlassCard,
+private val AppleIOSLightColorScheme = lightColorScheme(
+    primary = DockBg,
+    secondary = DockBg,
+    tertiary = TextSubtle,
+    background = CanvasBg,
+    surface = CardSurface,
+    surfaceVariant = PillBgInactive,
     error = AlertRed,
-    onPrimary = ObsidianBlack,
-    onSecondary = ObsidianBlack,
-    onBackground = PureWhite,
-    onSurface = PureWhite
+    onPrimary = PureWhite,
+    onSecondary = PureWhite,
+    onBackground = TextDark,
+    onSurface = TextDark
 )
 
 @Composable
 fun YCLiveTheme(content: @Composable () -> Unit) {
     MaterialTheme(
-        colorScheme = MonochromeLiquidColorScheme,
+        colorScheme = AppleIOSLightColorScheme,
         typography = Typography,
         content = content
     )
